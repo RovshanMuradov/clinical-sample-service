@@ -1,6 +1,6 @@
 import json
 import time
-from typing import Any, Callable
+from typing import Any, Awaitable, Callable
 
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -19,7 +19,9 @@ from ..core.logging import (
 class LoggingMiddleware(BaseHTTPMiddleware):
     """Middleware for request/response logging with correlation ID."""
 
-    async def dispatch(self, request: Request, call_next: Callable) -> Response:
+    async def dispatch(
+        self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
         # Generate correlation ID
         correlation_id = (
             request.headers.get("X-Correlation-ID") or generate_correlation_id()
@@ -63,9 +65,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             logger = get_logger(__name__)
             logger.error(f"Error logging request: {e}")
 
-    async def _get_request_body(
-        self, request: Request
-    ) -> Any:
+    async def _get_request_body(self, request: Request) -> Any:
         """Get request body safely."""
         if request.method == "GET":
             return None
@@ -77,7 +77,11 @@ class LoggingMiddleware(BaseHTTPMiddleware):
 
             try:
                 parsed_body = json.loads(body_bytes.decode("utf-8"))
-                return parsed_body if isinstance(parsed_body, dict) else {"parsed_body": parsed_body}
+                return (
+                    parsed_body
+                    if isinstance(parsed_body, dict)
+                    else {"parsed_body": parsed_body}
+                )
             except (json.JSONDecodeError, UnicodeDecodeError):
                 return {"raw_body_size": len(body_bytes)}
         except Exception:
@@ -154,7 +158,9 @@ class LoggingMiddleware(BaseHTTPMiddleware):
 class SecurityLoggingMiddleware(BaseHTTPMiddleware):
     """Middleware for security event logging."""
 
-    async def dispatch(self, request: Request, call_next: Callable) -> Response:
+    async def dispatch(
+        self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
         # Check for suspicious patterns
         self._check_suspicious_patterns(request)
 
@@ -251,7 +257,9 @@ class SecurityLoggingMiddleware(BaseHTTPMiddleware):
 class PerformanceLoggingMiddleware(BaseHTTPMiddleware):
     """Middleware for performance monitoring."""
 
-    async def dispatch(self, request: Request, call_next: Callable) -> Response:
+    async def dispatch(
+        self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
         start_time = time.time()
 
         response = await call_next(request)
