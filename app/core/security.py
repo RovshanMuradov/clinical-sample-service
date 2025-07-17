@@ -35,7 +35,15 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     Returns:
         bool: True if password matches, False otherwise
     """
-    return pwd_context.verify(plain_password, hashed_password)  # type: ignore
+    # Handle edge cases
+    if not hashed_password or not plain_password:
+        return False
+    
+    try:
+        return pwd_context.verify(plain_password, hashed_password)  # type: ignore
+    except Exception:
+        # If verification fails due to invalid hash format, return False
+        return False
 
 
 def create_access_token(
