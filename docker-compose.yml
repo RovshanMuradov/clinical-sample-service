@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: clinical_samples_db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-clinical_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-clinical_pass_2024}
+      POSTGRES_DB: ${POSTGRES_DB:-clinical_samples_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - clinical_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-clinical_user} -d ${POSTGRES_DB:-clinical_samples_db}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+  # Clinical Sample Service Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: clinical_sample_service
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-clinical_user}:${POSTGRES_PASSWORD:-clinical_pass_2024}@db:5432/${POSTGRES_DB:-clinical_samples_db}
+      - SECRET_KEY=${SECRET_KEY}
+      - ALGORITHM=${ALGORITHM:-HS256}
+      - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
+      - DEBUG=${DEBUG:-True}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - CORS_ORIGINS=${CORS_ORIGINS:-["http://localhost:3000", "http://localhost:8080"]}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./logs:/app/logs
+      - ./app:/app/app:ro  # Mount source code for development (read-only)
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - clinical_network
+    restart: unless-stopped
+    command: >
+      sh -c "
+        echo 'Waiting for database to be ready...' &&
+        sleep 5 &&
+        echo 'Running database migrations...' &&
+        alembic upgrade head &&
+        echo 'Starting application...' &&
+        uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+      "
+
+  # Redis (for future caching needs)
+  redis:
+    image: redis:7-alpine
+    container_name: clinical_redis
+    ports:
+      - "6379:6379"
+    networks:
+      - clinical_network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  clinical_network:
+    driver: bridge
