@@ -1,9 +1,9 @@
 from typing import Any, Dict, List, Optional
 from uuid import UUID
 
-from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from ..core.exceptions import AuthorizationError, NotFoundError, ValidationError
 from ..models.user import User
 from ..repositories.sample_repository import SampleRepository
 from ..schemas.sample import (
@@ -68,15 +68,14 @@ class SampleService:
         sample = await self.sample_repository.get_sample_by_id(sample_id)
 
         if not sample:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Sample not found"
-            )
+            raise NotFoundError(resource="Sample", resource_id=str(sample_id))
 
         # Check if sample belongs to current user
         if sample.user_id != current_user.id:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Access denied to this sample",
+            raise AuthorizationError(
+                message="Access denied to this sample",
+                resource="sample",
+                details={"sample_id": str(sample_id)}
             )
 
         return SampleResponse.model_validate(sample)
@@ -102,15 +101,15 @@ class SampleService:
         """
         # Validate pagination parameters
         if skip < 0:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Skip parameter must be non-negative",
+            raise ValidationError(
+                message="Skip parameter must be non-negative",
+                field="skip"
             )
 
         if limit <= 0 or limit > 1000:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Limit parameter must be between 1 and 1000",
+            raise ValidationError(
+                message="Limit parameter must be between 1 and 1000",
+                field="limit"
             )
 
         # Filter samples by current user to ensure data isolation
@@ -156,15 +155,14 @@ class SampleService:
         # Check if sample exists
         existing_sample = await self.sample_repository.get_sample_by_id(sample_id)
         if not existing_sample:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Sample not found"
-            )
+            raise NotFoundError(resource="Sample", resource_id=str(sample_id))
 
         # Check if sample belongs to current user
         if existing_sample.user_id != current_user.id:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Access denied to this sample",
+            raise AuthorizationError(
+                message="Access denied to this sample",
+                resource="sample",
+                details={"sample_id": str(sample_id)}
             )
 
         # Convert Pydantic model to dict, excluding None values
@@ -176,9 +174,7 @@ class SampleService:
         )
 
         if not updated_sample:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Sample not found"
-            )
+            raise NotFoundError(resource="Sample", resource_id=str(sample_id))
 
         return SampleResponse.model_validate(updated_sample)
 
@@ -199,24 +195,21 @@ class SampleService:
         # Check if sample exists
         existing_sample = await self.sample_repository.get_sample_by_id(sample_id)
         if not existing_sample:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Sample not found"
-            )
+            raise NotFoundError(resource="Sample", resource_id=str(sample_id))
 
         # Check if sample belongs to current user
         if existing_sample.user_id != current_user.id:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Access denied to this sample",
+            raise AuthorizationError(
+                message="Access denied to this sample",
+                resource="sample",
+                details={"sample_id": str(sample_id)}
             )
 
         # Delete sample
         deleted = await self.sample_repository.delete_sample(sample_id)
 
         if not deleted:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Sample not found"
-            )
+            raise NotFoundError(resource="Sample", resource_id=str(sample_id))
 
         return {"message": "Sample deleted successfully"}
 

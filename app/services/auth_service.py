@@ -1,9 +1,9 @@
 from typing import Optional
 from uuid import UUID
 
-from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from ..core.exceptions import AuthenticationError, ConflictError
 from ..core.security import (
     create_access_token,
     get_password_hash,
@@ -37,15 +37,18 @@ class AuthService:
         """
         # Check if email already exists
         if await self.user_repository.email_exists(user_data.email):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Email already registered",
+            raise ConflictError(
+                message="Email already registered",
+                resource="email",
+                details={"email": user_data.email}
             )
 
         # Check if username already exists
         if await self.user_repository.username_exists(user_data.username):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, detail="Username already taken"
+            raise ConflictError(
+                message="Username already taken",
+                resource="username",
+                details={"username": user_data.username}
             )
 
         # Hash password
@@ -141,7 +144,7 @@ class AuthService:
 
             return user
 
-        except HTTPException:
+        except (AuthenticationError, ConflictError):
             return None
 
     async def login_user(self, login_data: UserLogin) -> Token:
@@ -161,10 +164,9 @@ class AuthService:
         user = await self.authenticate_user(login_data)
 
         if not user:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Incorrect email or password",
-                headers={"WWW-Authenticate": "Bearer"},
+            raise AuthenticationError(
+                message="Incorrect email or password",
+                details={"email": login_data.email}
             )
 
         # Create access token
@@ -185,19 +187,17 @@ class AuthService:
         """
         # Check if user is still active
         if not current_user.is_active:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="User account is inactive",
-                headers={"WWW-Authenticate": "Bearer"},
+            raise AuthenticationError(
+                message="User account is inactive",
+                details={"user_id": str(current_user.id)}
             )
 
         # Get fresh user data from database to ensure it's up to date
         fresh_user = await self.user_repository.get_user_by_id(current_user.id)
         if not fresh_user or not fresh_user.is_active:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="User account is inactive or not found",
-                headers={"WWW-Authenticate": "Bearer"},
+            raise AuthenticationError(
+                message="User account is inactive or not found",
+                details={"user_id": str(current_user.id)}
             )
 
         # Create new access token

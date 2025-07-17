@@ -1,10 +1,11 @@
 import logging
 from typing import AsyncGenerator
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from ..core.exceptions import AuthenticationError, ValidationError
 from ..db.base import get_db
 
 logger = logging.getLogger(__name__)
@@ -44,10 +45,9 @@ async def get_current_user(
     from app.services.auth_service import AuthService
 
     if not credentials or not credentials.credentials:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="No authorization token provided",
-            headers={"WWW-Authenticate": "Bearer"},
+        raise AuthenticationError(
+            message="No authorization token provided",
+            details={"reason": "missing_token"}
         )
 
     token = credentials.credentials
@@ -57,10 +57,9 @@ async def get_current_user(
     user = await auth_service.get_current_user_by_token(token)
 
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate credentials",
-            headers={"WWW-Authenticate": "Bearer"},
+        raise AuthenticationError(
+            message="Could not validate credentials",
+            details={"reason": "invalid_token"}
         )
 
     logger.info(f"Authentication successful for user: {user.username}")
@@ -81,8 +80,9 @@ async def get_current_active_user(current_user=Depends(get_current_user)):
         HTTPException: If user is not active
     """
     if not current_user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user"
+        raise ValidationError(
+            message="User account is inactive",
+            details={"user_id": str(current_user.id)}
         )
 
     return current_user
@@ -108,5 +108,5 @@ async def get_optional_current_user(
 
     try:
         return await get_current_user(credentials, db)
-    except HTTPException:
+    except (AuthenticationError, ValidationError):
         return None
