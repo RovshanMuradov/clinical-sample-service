@@ -38,6 +38,11 @@ services:
       - DEBUG=${DEBUG:-True}
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
       - CORS_ORIGINS=${CORS_ORIGINS:-["http://localhost:3000", "http://localhost:8080"]}
+      - RATE_LIMIT_PER_MINUTE=${RATE_LIMIT_PER_MINUTE:-60}
+      - RATE_LIMIT_BURST=${RATE_LIMIT_BURST:-10}
+      - REQUEST_TIMEOUT_SECONDS=${REQUEST_TIMEOUT_SECONDS:-30}
+      - MAX_PAYLOAD_SIZE_MB=${MAX_PAYLOAD_SIZE_MB:-10}
+      - ENABLE_HSTS=${ENABLE_HSTS:-False}
     ports:
       - "8000:8000"
     volumes:

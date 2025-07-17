@@ -22,8 +22,13 @@ from .core.exceptions import (
 from .core.logging import get_logger, setup_logging
 from .db.base import close_db
 from .middleware import (
+    ContentTypeValidationMiddleware,
     LoggingMiddleware,
+    PayloadSizeValidationMiddleware,
     PerformanceLoggingMiddleware,
+    RateLimitMiddleware,
+    RequestTimeoutMiddleware,
+    SecurityHeadersMiddleware,
     SecurityLoggingMiddleware,
 )
 
@@ -66,13 +71,48 @@ app = FastAPI(
     debug=settings.debug,
 )
 
-# Add CORS middleware
+# Add CORS middleware with production-ready settings
+cors_methods = ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"]
+cors_headers = [
+    "Accept",
+    "Accept-Language",
+    "Content-Language",
+    "Content-Type",
+    "Authorization",
+    "X-Requested-With",
+    "X-Correlation-ID",
+]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=cors_methods,
+    allow_headers=cors_headers,
+    expose_headers=["X-Correlation-ID"],
+    max_age=600,  # 10 minutes
+)
+
+# Add security middleware (order matters!)
+app.add_middleware(
+    SecurityHeadersMiddleware,
+    enable_hsts=settings.enable_hsts,
+)
+app.add_middleware(
+    PayloadSizeValidationMiddleware,
+    max_size_mb=settings.max_payload_size_mb,
+)
+app.add_middleware(
+    ContentTypeValidationMiddleware,
+)
+app.add_middleware(
+    RequestTimeoutMiddleware,
+    timeout_seconds=settings.request_timeout_seconds,
+)
+app.add_middleware(
+    RateLimitMiddleware,
+    requests_per_minute=settings.rate_limit_per_minute,
+    burst_limit=settings.rate_limit_burst,
 )
 
 # Add logging middleware

@@ -32,6 +32,13 @@ class Settings(BaseSettings):
         default=["http://localhost:3000", "http://localhost:8080"], alias="CORS_ORIGINS"
     )
 
+    # Security settings
+    rate_limit_per_minute: int = Field(default=60, alias="RATE_LIMIT_PER_MINUTE")
+    rate_limit_burst: int = Field(default=10, alias="RATE_LIMIT_BURST")
+    request_timeout_seconds: int = Field(default=30, alias="REQUEST_TIMEOUT_SECONDS")
+    max_payload_size_mb: int = Field(default=10, alias="MAX_PAYLOAD_SIZE_MB")
+    enable_hsts: bool = Field(default=False, alias="ENABLE_HSTS")
+
     # PostgreSQL settings (for Docker)
     postgres_user: Optional[str] = Field(default=None, alias="POSTGRES_USER")
     postgres_password: Optional[str] = Field(default=None, alias="POSTGRES_PASSWORD")
