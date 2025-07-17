@@ -13,6 +13,8 @@ pydantic-settings==2.10.1
 email-validator==2.2.0
 pytest==8.4.1
 pytest-asyncio==1.1.0
+pytest-cov==4.0.0
+aiosqlite==0.19.0
 httpx==0.28.1
 python-dotenv==1.1.1
 bcrypt==4.3.0
