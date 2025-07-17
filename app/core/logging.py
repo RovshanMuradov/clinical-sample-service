@@ -2,7 +2,7 @@ import logging
 import logging.handlers
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
 from .config import settings
 
@@ -58,6 +58,7 @@ def setup_logging(
     root_logger.addHandler(console_handler)
 
     # File handler with rotation
+    file_handler: Union[logging.handlers.RotatingFileHandler, logging.FileHandler]
     if enable_rotation:
         file_handler = logging.handlers.RotatingFileHandler(
             log_file, maxBytes=10 * 1024 * 1024, backupCount=5, encoding="utf-8"  # 10MB

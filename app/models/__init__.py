@@ -1,9 +1,9 @@
+from .sample import Sample, SampleStatus, SampleType
 from .user import User
-from .sample import Sample, SampleType, SampleStatus
 
 __all__ = [
     "User",
-    "Sample", 
+    "Sample",
     "SampleType",
     "SampleStatus",
 ]

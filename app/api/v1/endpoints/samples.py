@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ...deps import get_current_user, get_database
+from app.models.user import User
 
 # Create router for sample endpoints
 router = APIRouter()
@@ -12,7 +13,7 @@ router = APIRouter()
 @router.post("/", summary="Create a new sample")
 async def create_sample(
     db: AsyncSession = Depends(get_database),
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
 ):
     """
     Create a new clinical sample.
@@ -23,7 +24,7 @@ async def create_sample(
     return {
         "message": "Create sample endpoint - TODO: Implement sample creation logic",
         "status": "not_implemented",
-        "user": current_user["username"],
+        "user": current_user.username,
     }
 
 
@@ -34,7 +35,7 @@ async def get_samples(
     status_filter: Optional[str] = None,
     type_filter: Optional[str] = None,
     db: AsyncSession = Depends(get_database),
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
 ):
     """
     Get all clinical samples with optional filtering.
@@ -51,7 +52,7 @@ async def get_samples(
             "status": status_filter,
             "type": type_filter,
         },
-        "user": current_user["username"],
+        "user": current_user.username,
     }
 
 
@@ -59,7 +60,7 @@ async def get_samples(
 async def get_sample(
     sample_id: str,
     db: AsyncSession = Depends(get_database),
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
 ):
     """
     Get a specific clinical sample by ID.
@@ -71,7 +72,7 @@ async def get_sample(
         "message": f"Get sample {sample_id} endpoint - TODO: Implement sample retrieval logic",
         "status": "not_implemented",
         "sample_id": sample_id,
-        "user": current_user["username"],
+        "user": current_user.username,
     }
 
 
@@ -79,7 +80,7 @@ async def get_sample(
 async def update_sample(
     sample_id: str,
     db: AsyncSession = Depends(get_database),
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
 ):
     """
     Update a clinical sample.
@@ -91,7 +92,7 @@ async def update_sample(
         "message": f"Update sample {sample_id} endpoint - TODO: Implement sample update logic",
         "status": "not_implemented",
         "sample_id": sample_id,
-        "user": current_user["username"],
+        "user": current_user.username,
     }
 
 
@@ -99,7 +100,7 @@ async def update_sample(
 async def delete_sample(
     sample_id: str,
     db: AsyncSession = Depends(get_database),
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
 ):
     """
     Delete a clinical sample.
@@ -111,5 +112,5 @@ async def delete_sample(
         "message": f"Delete sample {sample_id} endpoint - TODO: Implement sample deletion logic",
         "status": "not_implemented",
         "sample_id": sample_id,
-        "user": current_user["username"],
+        "user": current_user.username,
     }

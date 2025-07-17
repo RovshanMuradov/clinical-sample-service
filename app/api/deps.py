@@ -5,7 +5,6 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..core.config import settings
 from ..db.base import get_db
 
 logger = logging.getLogger(__name__)
@@ -32,21 +31,17 @@ async def get_current_user(
     """
     Dependency to get current authenticated user.
 
-    This is a placeholder for future authentication implementation.
-    For now, it validates the token format but doesn't verify the user.
-
     Args:
         credentials: JWT token from Authorization header
         db: Database session
 
     Returns:
-        dict: User information (placeholder)
+        User: Current authenticated user
 
     Raises:
-        HTTPException: If token is invalid
+        HTTPException: If token is invalid or user not found
     """
-    # TODO: Implement actual JWT token validation when User model is ready
-    # For now, just validate that a token is present
+    from app.services.auth_service import AuthService
 
     if not credentials or not credentials.credentials:
         raise HTTPException(
@@ -57,27 +52,22 @@ async def get_current_user(
 
     token = credentials.credentials
 
-    # Basic token format validation (placeholder)
-    if len(token) < 10:
+    # Get user from token using AuthService
+    auth_service = AuthService(db)
+    user = await auth_service.get_current_user_by_token(token)
+
+    if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid token format",
+            detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    logger.info(f"Authentication check passed for token: {token[:10]}...")
-
-    # Return placeholder user data
-    # TODO: Replace with actual user lookup when User model is implemented
-    return {
-        "user_id": "placeholder_user_id",
-        "username": "placeholder_user",
-        "email": "user@example.com",
-        "is_active": True,
-    }
+    logger.info(f"Authentication successful for user: {user.username}")
+    return user
 
 
-async def get_current_active_user(current_user: dict = Depends(get_current_user)):
+async def get_current_active_user(current_user=Depends(get_current_user)):
     """
     Dependency to get current active user.
 
@@ -85,12 +75,12 @@ async def get_current_active_user(current_user: dict = Depends(get_current_user)
         current_user: Current user from get_current_user dependency
 
     Returns:
-        dict: Active user information
+        User: Active user information
 
     Raises:
         HTTPException: If user is not active
     """
-    if not current_user.get("is_active"):
+    if not current_user.is_active:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user"
         )
@@ -111,7 +101,7 @@ async def get_optional_current_user(
         db: Database session
 
     Returns:
-        dict | None: User information if authenticated, None otherwise
+        User | None: User information if authenticated, None otherwise
     """
     if not credentials or not credentials.credentials:
         return None

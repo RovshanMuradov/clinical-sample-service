@@ -12,15 +12,20 @@ from alembic import context
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 # Import application modules
-from app.core.config import settings
 from app.db.base import Base
+from app.core.config import settings
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 
 # Set the database URL from our settings
-config.set_main_option("sqlalchemy.url", settings.database_url)
+# Convert asyncpg URL to psycopg2 format for Alembic
+database_url = settings.database_url
+if database_url.startswith("postgresql+asyncpg://"):
+    database_url = database_url.replace("postgresql+asyncpg://", "postgresql://")
+
+config.set_main_option("sqlalchemy.url", database_url)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -51,8 +56,7 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    # Convert asyncpg URL to psycopg2 for Alembic
-    url = settings.database_url.replace("postgresql+asyncpg://", "postgresql://")
+    url = database_url
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -73,12 +77,8 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    # Override the sqlalchemy.url with our settings
-    # Convert asyncpg URL to psycopg2 for Alembic
-    sync_db_url = settings.database_url.replace("postgresql+asyncpg://", "postgresql://")
-    
     configuration = config.get_section(config.config_ini_section)
-    configuration["sqlalchemy.url"] = sync_db_url
+    configuration["sqlalchemy.url"] = database_url
     
     connectable = engine_from_config(
         configuration,

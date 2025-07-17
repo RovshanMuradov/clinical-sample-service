@@ -63,10 +63,10 @@ class Settings(BaseSettings):
         return v
 
 
-# Global settings instance
-settings = Settings()
-
-
 def get_settings() -> Settings:
     """Get application settings."""
-    return settings
+    return Settings()  # type: ignore
+
+
+# Global settings instance
+settings = get_settings()

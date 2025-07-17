@@ -1,8 +1,8 @@
-from datetime import datetime, date
+from datetime import date, datetime
 from enum import Enum as PyEnum
-from uuid import uuid4
+from uuid import UUID as UUIDType, uuid4
 
-from sqlalchemy import String, DateTime, Date, Index, Enum
+from sqlalchemy import Date, DateTime, Enum, Index, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
@@ -25,57 +25,51 @@ class SampleStatus(PyEnum):
 class Sample(Base):
     __tablename__ = "samples"
 
-    id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False), 
-        primary_key=True, 
-        default=lambda: str(uuid4()),
-        comment="Unique sample record identifier"
+    id: Mapped[UUIDType] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid4,
+        comment="Unique sample record identifier",
     )
-    sample_id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False), 
+    sample_id: Mapped[UUIDType] = mapped_column(
+        UUID(as_uuid=True),
         unique=True,
         nullable=False,
-        default=lambda: str(uuid4()),
-        comment="Unique sample identifier for tracking"
+        default=uuid4,
+        comment="Unique sample identifier for tracking",
     )
     sample_type: Mapped[SampleType] = mapped_column(
         Enum(SampleType, native_enum=False),
         nullable=False,
-        comment="Type of clinical sample"
+        comment="Type of clinical sample",
     )
     subject_id: Mapped[str] = mapped_column(
-        String(50), 
-        nullable=False,
-        comment="Subject/patient identifier"
+        String(50), nullable=False, comment="Subject/patient identifier"
     )
     collection_date: Mapped[date] = mapped_column(
-        Date,
-        nullable=False,
-        comment="Date when sample was collected"
+        Date, nullable=False, comment="Date when sample was collected"
     )
     status: Mapped[SampleStatus] = mapped_column(
         Enum(SampleStatus, native_enum=False),
         default=SampleStatus.COLLECTED,
         nullable=False,
-        comment="Current processing status of sample"
+        comment="Current processing status of sample",
     )
     storage_location: Mapped[str] = mapped_column(
-        String(255),
-        nullable=True,
-        comment="Physical storage location identifier"
+        String(255), nullable=True, comment="Physical storage location identifier"
     )
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), 
+        DateTime(timezone=True),
         server_default=func.now(),
         nullable=False,
-        comment="Record creation timestamp"
+        comment="Record creation timestamp",
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), 
+        DateTime(timezone=True),
         server_default=func.now(),
         onupdate=func.now(),
         nullable=False,
-        comment="Last update timestamp"
+        comment="Last update timestamp",
     )
 
     __table_args__ = (
