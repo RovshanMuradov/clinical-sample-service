@@ -40,7 +40,7 @@ class AuthService:
             raise ConflictError(
                 message="Email already registered",
                 resource="email",
-                details={"email": user_data.email}
+                details={"email": user_data.email},
             )
 
         # Check if username already exists
@@ -48,7 +48,7 @@ class AuthService:
             raise ConflictError(
                 message="Username already taken",
                 resource="username",
-                details={"username": user_data.username}
+                details={"username": user_data.username},
             )
 
         # Hash password
@@ -166,7 +166,7 @@ class AuthService:
         if not user:
             raise AuthenticationError(
                 message="Incorrect email or password",
-                details={"email": login_data.email}
+                details={"email": login_data.email},
             )
 
         # Create access token
@@ -189,7 +189,7 @@ class AuthService:
         if not current_user.is_active:
             raise AuthenticationError(
                 message="User account is inactive",
-                details={"user_id": str(current_user.id)}
+                details={"user_id": str(current_user.id)},
             )
 
         # Get fresh user data from database to ensure it's up to date
@@ -197,7 +197,7 @@ class AuthService:
         if not fresh_user or not fresh_user.is_active:
             raise AuthenticationError(
                 message="User account is inactive or not found",
-                details={"user_id": str(current_user.id)}
+                details={"user_id": str(current_user.id)},
             )
 
         # Create new access token

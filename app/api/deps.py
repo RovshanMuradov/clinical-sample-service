@@ -47,7 +47,7 @@ async def get_current_user(
     if not credentials or not credentials.credentials:
         raise AuthenticationError(
             message="No authorization token provided",
-            details={"reason": "missing_token"}
+            details={"reason": "missing_token"},
         )
 
     token = credentials.credentials
@@ -59,7 +59,7 @@ async def get_current_user(
     if not user:
         raise AuthenticationError(
             message="Could not validate credentials",
-            details={"reason": "invalid_token"}
+            details={"reason": "invalid_token"},
         )
 
     logger.info(f"Authentication successful for user: {user.username}")
@@ -82,7 +82,7 @@ async def get_current_active_user(current_user=Depends(get_current_user)):
     if not current_user.is_active:
         raise ValidationError(
             message="User account is inactive",
-            details={"user_id": str(current_user.id)}
+            details={"user_id": str(current_user.id)},
         )
 
     return current_user

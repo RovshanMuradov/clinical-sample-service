@@ -4,9 +4,8 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ...deps import get_current_user, get_database
-from app.models.user import User
 from app.models.sample import SampleStatus, SampleType
+from app.models.user import User
 from app.schemas.sample import (
     SampleCreate,
     SampleFilter,
@@ -15,6 +14,8 @@ from app.schemas.sample import (
     SampleUpdate,
 )
 from app.services.sample_service import SampleService
+
+from ...deps import get_current_user, get_database
 
 # Create router for sample endpoints
 router = APIRouter()

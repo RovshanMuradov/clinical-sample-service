@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING, List
-from uuid import UUID as UUIDType, uuid4
+from uuid import UUID as UUIDType
+from uuid import uuid4
 
 from sqlalchemy import Boolean, DateTime, Index, String
 from sqlalchemy.dialects.postgresql import UUID

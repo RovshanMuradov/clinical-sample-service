@@ -21,6 +21,11 @@ from .core.exceptions import (
 )
 from .core.logging import get_logger, setup_logging
 from .db.base import close_db
+from .middleware import (
+    LoggingMiddleware,
+    PerformanceLoggingMiddleware,
+    SecurityLoggingMiddleware,
+)
 
 logger = get_logger(__name__)
 
@@ -35,9 +40,9 @@ async def lifespan(app: FastAPI):
     logger.info("Starting Clinical Sample Service...")
     logger.info(f"Environment: {'Development' if settings.debug else 'Production'}")
     db_info = (
-        settings.database_url.split('@')[1]
-        if '@' in settings.database_url
-        else 'Not configured'
+        settings.database_url.split("@")[1]
+        if "@" in settings.database_url
+        else "Not configured"
     )
     logger.info(f"Database URL: {db_info}")
 
@@ -70,24 +75,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-# Request logging middleware
-@app.middleware("http")
-async def log_requests(request, call_next):
-    """Log HTTP requests."""
-    start_time = time.time()
-
-    # Log request
-    logger.info(f"Request: {request.method} {request.url}")
-
-    # Process request
-    response = await call_next(request)
-
-    # Log response
-    process_time = time.time() - start_time
-    logger.info(f"Response: {response.status_code} - {process_time:.4f}s")
-
-    return response
+# Add logging middleware
+app.add_middleware(LoggingMiddleware)
+app.add_middleware(SecurityLoggingMiddleware)
+app.add_middleware(PerformanceLoggingMiddleware)
 
 
 # Custom exception handlers
@@ -320,8 +311,8 @@ async def root():
 if __name__ == "__main__":
     import uvicorn
 
-    # Setup logging
-    setup_logging()
+    # Setup logging with structured logging in production
+    setup_logging(structured_logging=not settings.debug)
 
     # Run the application
     uvicorn.run(

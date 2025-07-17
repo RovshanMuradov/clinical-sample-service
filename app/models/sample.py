@@ -1,7 +1,8 @@
 from datetime import date, datetime
 from enum import Enum as PyEnum
 from typing import TYPE_CHECKING
-from uuid import UUID as UUIDType, uuid4
+from uuid import UUID as UUIDType
+from uuid import uuid4
 
 from sqlalchemy import Date, DateTime, Enum, ForeignKey, Index, String
 from sqlalchemy.dialects.postgresql import UUID

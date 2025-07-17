@@ -75,7 +75,7 @@ class SampleService:
             raise AuthorizationError(
                 message="Access denied to this sample",
                 resource="sample",
-                details={"sample_id": str(sample_id)}
+                details={"sample_id": str(sample_id)},
             )
 
         return SampleResponse.model_validate(sample)
@@ -102,14 +102,12 @@ class SampleService:
         # Validate pagination parameters
         if skip < 0:
             raise ValidationError(
-                message="Skip parameter must be non-negative",
-                field="skip"
+                message="Skip parameter must be non-negative", field="skip"
             )
 
         if limit <= 0 or limit > 1000:
             raise ValidationError(
-                message="Limit parameter must be between 1 and 1000",
-                field="limit"
+                message="Limit parameter must be between 1 and 1000", field="limit"
             )
 
         # Filter samples by current user to ensure data isolation
@@ -162,7 +160,7 @@ class SampleService:
             raise AuthorizationError(
                 message="Access denied to this sample",
                 resource="sample",
-                details={"sample_id": str(sample_id)}
+                details={"sample_id": str(sample_id)},
             )
 
         # Convert Pydantic model to dict, excluding None values
@@ -202,7 +200,7 @@ class SampleService:
             raise AuthorizationError(
                 message="Access denied to this sample",
                 resource="sample",
-                details={"sample_id": str(sample_id)}
+                details={"sample_id": str(sample_id)},
             )
 
         # Delete sample
