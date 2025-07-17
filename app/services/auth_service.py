@@ -169,3 +169,36 @@ class AuthService:
 
         # Create access token
         return await self.create_access_token_for_user(user)
+
+    async def refresh_access_token(self, current_user: User) -> Token:
+        """
+        Refresh access token for current user.
+
+        Args:
+            current_user: Current authenticated user
+
+        Returns:
+            Token: New access token
+
+        Raises:
+            HTTPException: If user is not active
+        """
+        # Check if user is still active
+        if not current_user.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User account is inactive",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        # Get fresh user data from database to ensure it's up to date
+        fresh_user = await self.user_repository.get_user_by_id(current_user.id)
+        if not fresh_user or not fresh_user.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User account is inactive or not found",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        # Create new access token
+        return await self.create_access_token_for_user(fresh_user)

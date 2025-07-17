@@ -12,7 +12,7 @@ class UserRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def get_user_by_id(self, user_id: str) -> Optional[User]:
+    async def get_user_by_id(self, user_id) -> Optional[User]:
         """
         Get user by ID.
 
@@ -70,7 +70,7 @@ class UserRepository:
         await self.db.refresh(user)
         return user
 
-    async def update_user(self, user_id: str, user_data: dict) -> Optional[User]:
+    async def update_user(self, user_id, user_data: dict) -> Optional[User]:
         """
         Update user information.
 
@@ -93,7 +93,7 @@ class UserRepository:
         await self.db.refresh(user)
         return user
 
-    async def delete_user(self, user_id: str) -> bool:
+    async def delete_user(self, user_id) -> bool:
         """
         Delete a user.
 

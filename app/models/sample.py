@@ -2,9 +2,9 @@ from datetime import date, datetime
 from enum import Enum as PyEnum
 from uuid import UUID as UUIDType, uuid4
 
-from sqlalchemy import Date, DateTime, Enum, Index, String
+from sqlalchemy import Date, DateTime, Enum, ForeignKey, Index, String
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
 from ..db.base import Base
@@ -58,6 +58,12 @@ class Sample(Base):
     storage_location: Mapped[str] = mapped_column(
         String(255), nullable=True, comment="Physical storage location identifier"
     )
+    user_id: Mapped[UUIDType] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        comment="ID of user who created this sample"
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -72,6 +78,9 @@ class Sample(Base):
         comment="Last update timestamp",
     )
 
+    # Relationships  
+    user: Mapped["User"] = relationship("User", back_populates="samples")
+
     __table_args__ = (
         Index("ix_samples_sample_id", "sample_id"),
         Index("ix_samples_subject_id", "subject_id"),
@@ -79,6 +88,7 @@ class Sample(Base):
         Index("ix_samples_status", "status"),
         Index("ix_samples_collection_date", "collection_date"),
         Index("ix_samples_created_at", "created_at"),
+        Index("ix_samples_user_id", "user_id"),
     )
 
     def __repr__(self) -> str:

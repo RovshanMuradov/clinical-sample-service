@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ...deps import get_database
+from ...deps import get_current_user, get_database
+from app.models.user import User
 from app.schemas.auth import Token, UserCreate, UserLogin, UserResponse
 from app.services.auth_service import AuthService
 
@@ -50,14 +51,22 @@ async def login(login_data: UserLogin, db: AsyncSession = Depends(get_database))
 
 
 @router.post("/refresh", response_model=Token, summary="Refresh access token")
-async def refresh_token(db: AsyncSession = Depends(get_database)):
+async def refresh_token(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_database)
+):
     """
-    Refresh access token endpoint.
+    Refresh access token for authenticated user.
 
-    TODO: Implement token refresh logic when authentication is ready.
+    Args:
+        current_user: Current authenticated user (from valid JWT token)
+        db: Database session
+
+    Returns:
+        Token: New JWT access token
+
+    Raises:
+        HTTPException: If user is inactive or token is invalid
     """
-    # Placeholder implementation - would need current token verification
-    raise HTTPException(
-        status_code=status.HTTP_501_NOT_IMPLEMENTED,
-        detail="Token refresh not implemented yet",
-    )
+    auth_service = AuthService(db)
+    return await auth_service.refresh_access_token(current_user)

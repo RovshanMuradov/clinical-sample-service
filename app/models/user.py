@@ -3,7 +3,7 @@ from uuid import UUID as UUIDType, uuid4
 
 from sqlalchemy import Boolean, DateTime, Index, String
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
 from ..db.base import Base
@@ -43,6 +43,9 @@ class User(Base):
         nullable=False,
         comment="Last update timestamp",
     )
+
+    # Relationships  
+    samples: Mapped[list["Sample"]] = relationship("Sample", back_populates="user", cascade="all, delete-orphan")
 
     __table_args__ = (
         Index("ix_users_email", "email"),
