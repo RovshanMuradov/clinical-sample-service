@@ -8,6 +8,12 @@ from .auth import (
     UserResponse,
     UserUpdate,
 )
+from .errors import (
+    AuthenticationErrorResponse,
+    AuthorizationErrorResponse,
+    ErrorResponse,
+    ValidationErrorResponse,
+)
 from .sample import (
     SampleBase,
     SampleCreate,
@@ -27,6 +33,11 @@ __all__ = [
     "Token",
     "TokenData",
     "UserInToken",
+    # Error schemas
+    "ErrorResponse",
+    "ValidationErrorResponse",
+    "AuthenticationErrorResponse",
+    "AuthorizationErrorResponse",
     # Sample schemas
     "SampleBase",
     "SampleCreate",

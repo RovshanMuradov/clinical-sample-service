@@ -1,5 +1,6 @@
 from datetime import date, datetime
 from enum import Enum as PyEnum
+from typing import TYPE_CHECKING
 from uuid import UUID as UUIDType, uuid4
 
 from sqlalchemy import Date, DateTime, Enum, ForeignKey, Index, String
@@ -8,6 +9,9 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
 from ..db.base import Base
+
+if TYPE_CHECKING:
+    from .user import User
 
 
 class SampleType(PyEnum):
@@ -62,7 +66,7 @@ class Sample(Base):
         UUID(as_uuid=True),
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
-        comment="ID of user who created this sample"
+        comment="ID of user who created this sample",
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -78,7 +82,7 @@ class Sample(Base):
         comment="Last update timestamp",
     )
 
-    # Relationships  
+    # Relationships
     user: Mapped["User"] = relationship("User", back_populates="samples")
 
     __table_args__ = (
@@ -92,4 +96,7 @@ class Sample(Base):
     )
 
     def __repr__(self) -> str:
-        return f"<Sample(id={self.id}, sample_id={self.sample_id}, type={self.sample_type.value}, subject={self.subject_id})>"
+        return (
+            f"<Sample(id={self.id}, sample_id={self.sample_id}, "
+            f"type={self.sample_type.value}, subject={self.subject_id})>"
+        )

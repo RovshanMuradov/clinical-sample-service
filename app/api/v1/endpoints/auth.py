@@ -53,7 +53,7 @@ async def login(login_data: UserLogin, db: AsyncSession = Depends(get_database))
 @router.post("/refresh", response_model=Token, summary="Refresh access token")
 async def refresh_token(
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_database)
+    db: AsyncSession = Depends(get_database),
 ):
     """
     Refresh access token for authenticated user.

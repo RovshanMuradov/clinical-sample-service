@@ -78,42 +78,46 @@ class SampleRepository:
             List[Sample]: List of samples matching criteria
         """
         query = select(Sample)
-        
+
         # Apply filters
         conditions = []
-        
+
         # Always filter by user_id if provided (for data isolation)
         if user_id is not None:
             conditions.append(Sample.user_id == user_id)
-        
+
         if filters.sample_type is not None:
             conditions.append(Sample.sample_type == filters.sample_type)
-        
+
         if filters.subject_id is not None:
             conditions.append(Sample.subject_id == filters.subject_id)
-        
+
         if filters.status is not None:
             conditions.append(Sample.status == filters.status)
-        
+
         if filters.collection_date_from is not None:
             conditions.append(Sample.collection_date >= filters.collection_date_from)
-        
+
         if filters.collection_date_to is not None:
             conditions.append(Sample.collection_date <= filters.collection_date_to)
-        
+
         if filters.storage_location is not None:
-            conditions.append(Sample.storage_location.ilike(f"%{filters.storage_location}%"))
-        
+            conditions.append(
+                Sample.storage_location.ilike(f"%{filters.storage_location}%")
+            )
+
         if conditions:
             query = query.where(and_(*conditions))
-        
+
         # Apply pagination and ordering
         query = query.order_by(Sample.created_at.desc()).offset(skip).limit(limit)
-        
+
         result = await self.db.execute(query)
         return list(result.scalars().all())
 
-    async def count_samples_with_filters(self, filters: SampleFilter, user_id: Optional[UUID] = None) -> int:
+    async def count_samples_with_filters(
+        self, filters: SampleFilter, user_id: Optional[UUID] = None
+    ) -> int:
         """
         Count samples matching filter criteria.
 
@@ -125,39 +129,43 @@ class SampleRepository:
             int: Number of samples matching criteria
         """
         query = select(func.count(Sample.id))
-        
+
         # Apply same filters as in get_samples_with_filters
         conditions = []
-        
+
         # Always filter by user_id if provided (for data isolation)
         if user_id is not None:
             conditions.append(Sample.user_id == user_id)
-        
+
         if filters.sample_type is not None:
             conditions.append(Sample.sample_type == filters.sample_type)
-        
+
         if filters.subject_id is not None:
             conditions.append(Sample.subject_id == filters.subject_id)
-        
+
         if filters.status is not None:
             conditions.append(Sample.status == filters.status)
-        
+
         if filters.collection_date_from is not None:
             conditions.append(Sample.collection_date >= filters.collection_date_from)
-        
+
         if filters.collection_date_to is not None:
             conditions.append(Sample.collection_date <= filters.collection_date_to)
-        
+
         if filters.storage_location is not None:
-            conditions.append(Sample.storage_location.ilike(f"%{filters.storage_location}%"))
-        
+            conditions.append(
+                Sample.storage_location.ilike(f"%{filters.storage_location}%")
+            )
+
         if conditions:
             query = query.where(and_(*conditions))
-        
+
         result = await self.db.execute(query)
         return result.scalar() or 0
 
-    async def update_sample(self, sample_id: UUID, sample_data: dict) -> Optional[Sample]:
+    async def update_sample(
+        self, sample_id: UUID, sample_data: dict
+    ) -> Optional[Sample]:
         """
         Update sample information.
 
@@ -211,7 +219,9 @@ class SampleRepository:
         sample = await self.get_sample_by_sample_id(sample_id)
         return sample is not None
 
-    async def get_samples_by_subject_id(self, subject_id: str, user_id: Optional[UUID] = None) -> List[Sample]:
+    async def get_samples_by_subject_id(
+        self, subject_id: str, user_id: Optional[UUID] = None
+    ) -> List[Sample]:
         """
         Get all samples for a specific subject.
 
@@ -223,16 +233,18 @@ class SampleRepository:
             List[Sample]: List of samples for the subject
         """
         query = select(Sample).where(Sample.subject_id == subject_id)
-        
+
         # Filter by user_id if provided
         if user_id is not None:
             query = query.where(Sample.user_id == user_id)
-            
+
         query = query.order_by(Sample.created_at.desc())
         result = await self.db.execute(query)
         return list(result.scalars().all())
 
-    async def get_samples_by_status(self, status: SampleStatus, user_id: Optional[UUID] = None) -> List[Sample]:
+    async def get_samples_by_status(
+        self, status: SampleStatus, user_id: Optional[UUID] = None
+    ) -> List[Sample]:
         """
         Get all samples with a specific status.
 
@@ -244,16 +256,18 @@ class SampleRepository:
             List[Sample]: List of samples with the status
         """
         query = select(Sample).where(Sample.status == status)
-        
+
         # Filter by user_id if provided (for data isolation)
         if user_id is not None:
             query = query.where(Sample.user_id == user_id)
-            
+
         query = query.order_by(Sample.created_at.desc())
         result = await self.db.execute(query)
         return list(result.scalars().all())
 
-    async def get_samples_by_type(self, sample_type: SampleType, user_id: Optional[UUID] = None) -> List[Sample]:
+    async def get_samples_by_type(
+        self, sample_type: SampleType, user_id: Optional[UUID] = None
+    ) -> List[Sample]:
         """
         Get all samples with a specific type.
 
@@ -265,11 +279,11 @@ class SampleRepository:
             List[Sample]: List of samples with the type
         """
         query = select(Sample).where(Sample.sample_type == sample_type)
-        
+
         # Filter by user_id if provided (for data isolation)
         if user_id is not None:
             query = query.where(Sample.user_id == user_id)
-            
+
         query = query.order_by(Sample.created_at.desc())
         result = await self.db.execute(query)
         return list(result.scalars().all())

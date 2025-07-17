@@ -36,13 +36,25 @@ async def create_sample(
 @router.get("/", response_model=SampleListResponse, summary="Get all samples")
 async def get_samples(
     skip: int = Query(0, ge=0, description="Number of samples to skip"),
-    limit: int = Query(100, ge=1, le=1000, description="Maximum number of samples to return"),
-    sample_type: Optional[SampleType] = Query(None, description="Filter by sample type"),
-    sample_status: Optional[SampleStatus] = Query(None, description="Filter by sample status"),
+    limit: int = Query(
+        100, ge=1, le=1000, description="Maximum number of samples to return"
+    ),
+    sample_type: Optional[SampleType] = Query(
+        None, description="Filter by sample type"
+    ),
+    sample_status: Optional[SampleStatus] = Query(
+        None, description="Filter by sample status"
+    ),
     subject_id: Optional[str] = Query(None, description="Filter by subject ID"),
-    collection_date_from: Optional[str] = Query(None, description="Filter by collection date from (YYYY-MM-DD)"),
-    collection_date_to: Optional[str] = Query(None, description="Filter by collection date to (YYYY-MM-DD)"),
-    storage_location: Optional[str] = Query(None, description="Filter by storage location"),
+    collection_date_from: Optional[str] = Query(
+        None, description="Filter by collection date from (YYYY-MM-DD)"
+    ),
+    collection_date_to: Optional[str] = Query(
+        None, description="Filter by collection date to (YYYY-MM-DD)"
+    ),
+    storage_location: Optional[str] = Query(
+        None, description="Filter by storage location"
+    ),
     db: AsyncSession = Depends(get_database),
     current_user: User = Depends(get_current_user),
 ):
@@ -50,22 +62,28 @@ async def get_samples(
     Get all clinical samples with optional filtering and pagination.
     """
     from datetime import datetime
-    
+
     # Build filter object
     filters = SampleFilter(
         sample_type=sample_type,
         status=sample_status,
         subject_id=subject_id,
-        collection_date_from=datetime.strptime(collection_date_from, "%Y-%m-%d").date() if collection_date_from else None,
-        collection_date_to=datetime.strptime(collection_date_to, "%Y-%m-%d").date() if collection_date_to else None,
+        collection_date_from=datetime.strptime(collection_date_from, "%Y-%m-%d").date()
+        if collection_date_from
+        else None,
+        collection_date_to=datetime.strptime(collection_date_to, "%Y-%m-%d").date()
+        if collection_date_to
+        else None,
         storage_location=storage_location,
     )
-    
+
     sample_service = SampleService(db)
     return await sample_service.get_samples(filters, skip, limit, current_user)
 
 
-@router.get("/{sample_id}", response_model=SampleResponse, summary="Get a specific sample")
+@router.get(
+    "/{sample_id}", response_model=SampleResponse, summary="Get a specific sample"
+)
 async def get_sample(
     sample_id: UUID,
     db: AsyncSession = Depends(get_database),
@@ -105,7 +123,11 @@ async def delete_sample(
     return await sample_service.delete_sample(sample_id, current_user)
 
 
-@router.get("/subject/{subject_id}", response_model=List[SampleResponse], summary="Get samples by subject ID")
+@router.get(
+    "/subject/{subject_id}",
+    response_model=List[SampleResponse],
+    summary="Get samples by subject ID",
+)
 async def get_samples_by_subject(
     subject_id: str,
     db: AsyncSession = Depends(get_database),

@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 from uuid import UUID
 
 from fastapi import HTTPException, status
@@ -22,7 +22,9 @@ class SampleService:
         self.db = db
         self.sample_repository = SampleRepository(db)
 
-    async def create_sample(self, sample_data: SampleCreate, current_user: User) -> SampleResponse:
+    async def create_sample(
+        self, sample_data: SampleCreate, current_user: User
+    ) -> SampleResponse:
         """
         Create a new sample.
 
@@ -44,10 +46,12 @@ class SampleService:
 
         # Create sample
         sample = await self.sample_repository.create_sample(sample_dict)
-        
+
         return SampleResponse.model_validate(sample)
 
-    async def get_sample_by_id(self, sample_id: UUID, current_user: User) -> SampleResponse:
+    async def get_sample_by_id(
+        self, sample_id: UUID, current_user: User
+    ) -> SampleResponse:
         """
         Get sample by ID.
 
@@ -62,18 +66,17 @@ class SampleService:
             HTTPException: If sample not found
         """
         sample = await self.sample_repository.get_sample_by_id(sample_id)
-        
+
         if not sample:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Sample not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="Sample not found"
             )
 
         # Check if sample belongs to current user
         if sample.user_id != current_user.id:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Access denied to this sample"
+                detail="Access denied to this sample",
             )
 
         return SampleResponse.model_validate(sample)
@@ -101,13 +104,13 @@ class SampleService:
         if skip < 0:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Skip parameter must be non-negative"
+                detail="Skip parameter must be non-negative",
             )
-        
+
         if limit <= 0 or limit > 1000:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Limit parameter must be between 1 and 1000"
+                detail="Limit parameter must be between 1 and 1000",
             )
 
         # Filter samples by current user to ensure data isolation
@@ -116,17 +119,18 @@ class SampleService:
             pass
 
         # Get samples and count (filtered by current user)
-        samples = await self.sample_repository.get_samples_with_filters(filters, skip, limit, current_user.id if current_user else None)
-        total = await self.sample_repository.count_samples_with_filters(filters, current_user.id if current_user else None)
+        samples = await self.sample_repository.get_samples_with_filters(
+            filters, skip, limit, current_user.id if current_user else None
+        )
+        total = await self.sample_repository.count_samples_with_filters(
+            filters, current_user.id if current_user else None
+        )
 
         # Convert to response models
         sample_responses = [SampleResponse.model_validate(sample) for sample in samples]
 
         return SampleListResponse(
-            samples=sample_responses,
-            total=total,
-            skip=skip,
-            limit=limit
+            samples=sample_responses, total=total, skip=skip, limit=limit
         )
 
     async def update_sample(
@@ -153,27 +157,27 @@ class SampleService:
         existing_sample = await self.sample_repository.get_sample_by_id(sample_id)
         if not existing_sample:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Sample not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="Sample not found"
             )
 
         # Check if sample belongs to current user
         if existing_sample.user_id != current_user.id:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Access denied to this sample"
+                detail="Access denied to this sample",
             )
 
         # Convert Pydantic model to dict, excluding None values
         sample_dict = sample_data.model_dump(exclude_none=True)
 
         # Update sample
-        updated_sample = await self.sample_repository.update_sample(sample_id, sample_dict)
-        
+        updated_sample = await self.sample_repository.update_sample(
+            sample_id, sample_dict
+        )
+
         if not updated_sample:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Sample not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="Sample not found"
             )
 
         return SampleResponse.model_validate(updated_sample)
@@ -196,24 +200,22 @@ class SampleService:
         existing_sample = await self.sample_repository.get_sample_by_id(sample_id)
         if not existing_sample:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Sample not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="Sample not found"
             )
 
         # Check if sample belongs to current user
         if existing_sample.user_id != current_user.id:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Access denied to this sample"
+                detail="Access denied to this sample",
             )
 
         # Delete sample
         deleted = await self.sample_repository.delete_sample(sample_id)
-        
+
         if not deleted:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Sample not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="Sample not found"
             )
 
         return {"message": "Sample deleted successfully"}
@@ -234,11 +236,13 @@ class SampleService:
             List[SampleResponse]: List of samples for the subject
         """
         # Get samples for subject, filtered by current user
-        samples = await self.sample_repository.get_samples_by_subject_id(subject_id, current_user.id)
-        
+        samples = await self.sample_repository.get_samples_by_subject_id(
+            subject_id, current_user.id
+        )
+
         return [SampleResponse.model_validate(sample) for sample in samples]
 
-    async def get_sample_statistics(self, current_user: User) -> dict:
+    async def get_sample_statistics(self, current_user: User) -> Dict[str, Any]:
         """
         Get sample statistics for current user only (data isolation).
 
@@ -250,8 +254,8 @@ class SampleService:
         """
         # Get counts by status (with proper data isolation)
         from ..models.sample import SampleStatus, SampleType
-        
-        stats = {
+
+        stats: Dict[str, Any] = {
             "total_samples": 0,
             "by_status": {},
             "by_type": {},
@@ -259,15 +263,19 @@ class SampleService:
 
         # Get statistics by status with user_id filtering for data isolation
         for sample_status in SampleStatus:
-            samples = await self.sample_repository.get_samples_by_status(sample_status, current_user.id)
+            samples = await self.sample_repository.get_samples_by_status(
+                sample_status, current_user.id
+            )
             count = len(samples)
             stats["by_status"][sample_status.value] = count
             stats["total_samples"] += count
 
         # Get statistics by type with user_id filtering for data isolation
         for sample_type in SampleType:
-            samples = await self.sample_repository.get_samples_by_type(sample_type, current_user.id)
+            samples = await self.sample_repository.get_samples_by_type(
+                sample_type, current_user.id
+            )
             count = len(samples)
             stats["by_type"][sample_type.value] = count
-        
+
         return stats
