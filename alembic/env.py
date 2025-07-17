@@ -30,7 +30,7 @@ if config.config_file_name is not None:
 # add your model's MetaData object here
 # for 'autogenerate' support
 # Import all models so that Base.metadata contains all table definitions
-# from app.models import user, sample  # This will be uncommented when models are created
+from app.models import user, sample  # Import all models for autogenerate
 target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,
@@ -51,7 +51,8 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = settings.database_url
+    # Convert asyncpg URL to psycopg2 for Alembic
+    url = settings.database_url.replace("postgresql+asyncpg://", "postgresql://")
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -73,8 +74,11 @@ def run_migrations_online() -> None:
 
     """
     # Override the sqlalchemy.url with our settings
+    # Convert asyncpg URL to psycopg2 for Alembic
+    sync_db_url = settings.database_url.replace("postgresql+asyncpg://", "postgresql://")
+    
     configuration = config.get_section(config.config_ini_section)
-    configuration["sqlalchemy.url"] = settings.database_url
+    configuration["sqlalchemy.url"] = sync_db_url
     
     connectable = engine_from_config(
         configuration,
