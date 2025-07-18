@@ -526,22 +526,22 @@
 
 ### 2.3 Authorization Tests (⚠️ КРИТИЧНО для прав доступа!)
 🕒 **Время выполнения**: ~45 минут
-- [ ] **test_cannot_update_other_user_sample()**
+- [x] **test_cannot_update_other_user_sample()**
   ```python
   # User1 создает sample, User2 пытается обновить
   # Должно вернуть AuthorizationError
   ```
-- [ ] **test_cannot_delete_other_user_sample()**
+- [x] **test_cannot_delete_other_user_sample()**
   ```python
   # User1 создает sample, User2 пытается удалить
   # Должно вернуть AuthorizationError
   ```
-- [ ] **test_cannot_view_other_user_sample()**
+- [x] **test_cannot_view_other_user_sample()**
   ```python
   # User1 создает sample, User2 пытается просмотреть по ID
   # Должно вернуть AuthorizationError
   ```
-- [ ] **test_sample_creation_assigns_correct_user()**
+- [x] **test_sample_creation_assigns_correct_user()**
   ```python
   # Создать sample под User1, проверить что user_id = User1.id
   # Убедиться что нельзя создать sample для другого пользователя
@@ -551,22 +551,22 @@
 
 ### 3.1 Authentication Business Logic Tests
 🕒 **Время выполнения**: ~30 минут
-- [ ] **test_duplicate_email_registration_blocked()**
+- [x] **test_duplicate_email_registration_blocked()**
   ```python
   # Зарегистрировать пользователя, попытаться зарегистрировать с тем же email
   # Должно вернуть ConflictError
   ```
-- [ ] **test_duplicate_username_registration_blocked()**
+- [x] **test_duplicate_username_registration_blocked()**
   ```python
   # Зарегистрировать пользователя, попытаться зарегистрировать с тем же username
   # Должно вернуть ConflictError
   ```
-- [ ] **test_login_with_wrong_password_fails()**
+- [x] **test_login_with_wrong_password_fails()**
   ```python
   # Зарегистрировать пользователя, попытаться войти с неправильным паролем
   # Должно вернуть AuthenticationError
   ```
-- [ ] **test_inactive_user_cannot_login()**
+- [x] **test_inactive_user_cannot_login()**
   ```python
   # Создать неактивного пользователя, попытаться войти
   # Должно вернуть AuthenticationError
@@ -620,8 +620,8 @@
 - [x] Все существующие unit тесты проходят (202 тестов)
 - [x] **Data Isolation тесты проходят** (5 тестов) - КРИТИЧНО!
 - [x] **Authentication Security тесты проходят** (10 тестов) - КРИТИЧНО!
-- [ ] **Authorization тесты проходят** (4 теста) - КРИТИЧНО!
-- [ ] **Authentication Business Logic тесты проходят** (4 теста)
+- [x] **Authorization тесты проходят** (4 теста) - КРИТИЧНО!
+- [x] **Authentication Business Logic тесты проходят** (4 теста)
 - [ ] **Sample CRUD тесты проходят** (5 тестов)
 
 ### 🎯 Целевые метрики:

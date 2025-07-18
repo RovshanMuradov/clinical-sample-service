@@ -38,7 +38,7 @@ class AuthService:
         # Check if email already exists
         if await self.user_repository.email_exists(user_data.email):
             raise ConflictError(
-                message="Email already registered",
+                message="email already exists or conflicts with existing data",
                 resource="email",
                 details={"email": user_data.email},
             )
@@ -46,7 +46,7 @@ class AuthService:
         # Check if username already exists
         if await self.user_repository.username_exists(user_data.username):
             raise ConflictError(
-                message="Username already taken",
+                message="username already exists or conflicts with existing data",
                 resource="username",
                 details={"username": user_data.username},
             )
