@@ -7,7 +7,6 @@ access to sensitive medical data.
 """
 import uuid
 from datetime import datetime, timedelta, timezone
-# from unittest.mock import patch  # Removed unused import
 
 import pytest
 from fastapi import HTTPException
@@ -22,6 +21,10 @@ from app.core.security import (
     verify_token,
 )
 from app.services.auth_service import AuthService
+
+# from unittest.mock import patch  # Removed unused import
+
+
 
 
 class TestPasswordSecurity:

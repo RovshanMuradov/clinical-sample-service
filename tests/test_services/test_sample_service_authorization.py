@@ -12,7 +12,6 @@ Tests verify:
 4. Sample creation correctly assigns the authenticated user
 """
 from datetime import date
-# from uuid import uuid4  # Removed unused import
 
 import pytest
 
@@ -21,6 +20,10 @@ from app.models.sample import Sample, SampleStatus, SampleType
 from app.models.user import User
 from app.schemas.sample import SampleCreate, SampleUpdate
 from app.services.sample_service import SampleService
+
+# from uuid import uuid4  # Removed unused import
+
+
 
 
 @pytest.mark.asyncio
