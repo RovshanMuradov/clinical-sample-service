@@ -1,0 +1,88 @@
+version: 2
+updates:
+  # Enable version updates for Python dependencies
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "slo"
+    assignees:
+      - "slo"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "python"
+    # Group updates to reduce PR noise
+    groups:
+      fastapi-group:
+        patterns:
+          - "fastapi*"
+          - "uvicorn*"
+          - "starlette*"
+      database-group:
+        patterns:
+          - "sqlalchemy*"
+          - "alembic*"
+          - "asyncpg*"
+          - "psycopg*"
+          - "aiosqlite*"
+      security-group:
+        patterns:
+          - "cryptography*"
+          - "python-jose*"
+          - "passlib*"
+          - "bcrypt*"
+      testing-group:
+        patterns:
+          - "pytest*"
+          - "httpx*"
+      dev-tools-group:
+        patterns:
+          - "black*"
+          - "flake8*"
+          - "mypy*"
+          - "isort*"
+
+  # Enable version updates for Docker
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "06:00"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "slo"
+    assignees:
+      - "slo"
+    commit-message:
+      prefix: "docker"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "docker"
+
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "06:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "slo"
+    assignees:
+      - "slo"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "github-actions"

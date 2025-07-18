@@ -1,0 +1,139 @@
+name: CD
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=ref,event=tag
+          type=sha,prefix={{branch}}-
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  deploy-staging:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment: staging
+    
+    steps:
+    - name: Deploy to staging
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.STAGING_HOST }}
+        username: ${{ secrets.STAGING_USER }}
+        key: ${{ secrets.STAGING_SSH_KEY }}
+        port: ${{ secrets.STAGING_PORT || 22 }}
+        script: |
+          # Login to GHCR
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
+          
+          # Pull latest image
+          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
+          
+          # Stop and remove existing container
+          docker stop clinical-sample-service-staging || true
+          docker rm clinical-sample-service-staging || true
+          
+          # Run new container
+          docker run -d \
+            --name clinical-sample-service-staging \
+            --restart unless-stopped \
+            -p 8000:8000 \
+            -e DATABASE_URL="${{ secrets.STAGING_DATABASE_URL }}" \
+            -e SECRET_KEY="${{ secrets.STAGING_SECRET_KEY }}" \
+            -e DEBUG=False \
+            -e LOG_LEVEL=INFO \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
+          
+          # Wait for container to be ready
+          sleep 10
+          
+          # Health check
+          curl -f http://localhost:8000/health || exit 1
+
+  deploy-production:
+    needs: deploy-staging
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+    - name: Deploy to production
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.PRODUCTION_HOST }}
+        username: ${{ secrets.PRODUCTION_USER }}
+        key: ${{ secrets.PRODUCTION_SSH_KEY }}
+        port: ${{ secrets.PRODUCTION_PORT || 22 }}
+        script: |
+          # Login to GHCR
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
+          
+          # Pull latest image
+          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
+          
+          # Create backup of current container
+          docker commit clinical-sample-service-prod clinical-sample-service-backup:$(date +%Y%m%d_%H%M%S) || true
+          
+          # Stop and remove existing container
+          docker stop clinical-sample-service-prod || true
+          docker rm clinical-sample-service-prod || true
+          
+          # Run new container
+          docker run -d \
+            --name clinical-sample-service-prod \
+            --restart unless-stopped \
+            -p 80:8000 \
+            -e DATABASE_URL="${{ secrets.PRODUCTION_DATABASE_URL }}" \
+            -e SECRET_KEY="${{ secrets.PRODUCTION_SECRET_KEY }}" \
+            -e DEBUG=False \
+            -e LOG_LEVEL=WARNING \
+            -e ENVIRONMENT=production \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
+          
+          # Wait for container to be ready
+          sleep 15
+          
+          # Health check
+          curl -f http://localhost/health || exit 1
+          
+          # Clean up old backup images (keep last 5)
+          docker images clinical-sample-service-backup --format "table {{.Repository}}\t{{.Tag}}\t{{.ID}}" | tail -n +6 | awk '{print $3}' | xargs -r docker rmi || true
