@@ -95,7 +95,7 @@ async def test_user1(user_repository: UserRepository) -> User:
     """Create test user 1."""
     user_data = {
         "username": "testuser1",
-        "email": "user1@clinical.test",
+        "email": "user1@example.com",
         "hashed_password": get_password_hash("testpass123"),
         "is_active": True,
     }
@@ -107,7 +107,7 @@ async def test_user2(user_repository: UserRepository) -> User:
     """Create test user 2."""
     user_data = {
         "username": "testuser2", 
-        "email": "user2@clinical.test",
+        "email": "user2@example.com",
         "hashed_password": get_password_hash("testpass456"),
         "is_active": True,
     }

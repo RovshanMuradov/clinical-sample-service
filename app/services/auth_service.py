@@ -144,7 +144,8 @@ class AuthService:
 
             return user
 
-        except (AuthenticationError, ConflictError):
+        except Exception:
+            # Handle all exceptions (HTTPException from verify_token, AuthenticationError, ConflictError, etc.)
             return None
 
     async def login_user(self, login_data: UserLogin) -> Token:
