@@ -30,7 +30,7 @@ jobs:
 
     - name: Run linting with flake8
       run: |
-        flake8 app/ tests/ --max-line-length=88 --extend-ignore=E203,W503
+        flake8 app/ tests/
 
     - name: Run type checking with mypy
       run: |
