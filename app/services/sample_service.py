@@ -3,7 +3,7 @@ from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..core.exceptions import AuthorizationError, NotFoundError, ValidationError
+from ..core.exceptions import AuthorizationError, NotFoundError
 from ..models.user import User
 from ..repositories.sample_repository import SampleRepository
 from ..schemas.sample import (

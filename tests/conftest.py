@@ -4,11 +4,11 @@ Test configuration and fixtures.
 import asyncio
 from datetime import date
 from typing import AsyncGenerator, Generator
-from unittest.mock import AsyncMock
+# from unittest.mock import AsyncMock  # Removed unused import
 
 import pytest
 import pytest_asyncio
-from sqlalchemy import create_engine
+# from sqlalchemy import create_engine  # Removed unused import
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import StaticPool
 
@@ -20,7 +20,6 @@ from app.repositories.sample_repository import SampleRepository
 from app.repositories.user_repository import UserRepository
 from app.services.auth_service import AuthService
 from app.services.sample_service import SampleService
-
 
 # Test database URL (SQLite in-memory for fast tests)
 SQLALCHEMY_TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
@@ -43,15 +42,15 @@ async def async_engine():
         poolclass=StaticPool,
         connect_args={"check_same_thread": False},
     )
-    
+
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    
+
     yield engine
-    
+
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
-    
+
     await engine.dispose()
 
 
@@ -61,7 +60,7 @@ async def async_session(async_engine) -> AsyncGenerator[AsyncSession, None]:
     async_session_maker = async_sessionmaker(
         bind=async_engine, class_=AsyncSession, expire_on_commit=False
     )
-    
+
     async with async_session_maker() as session:
         yield session
 
@@ -106,7 +105,7 @@ async def test_user1(user_repository: UserRepository) -> User:
 async def test_user2(user_repository: UserRepository) -> User:
     """Create test user 2."""
     user_data = {
-        "username": "testuser2", 
+        "username": "testuser2",
         "email": "user2@example.com",
         "hashed_password": get_password_hash("testpass456"),
         "is_active": True,
@@ -115,7 +114,9 @@ async def test_user2(user_repository: UserRepository) -> User:
 
 
 @pytest_asyncio.fixture
-async def test_samples_user1(sample_repository: SampleRepository, test_user1: User) -> list[Sample]:
+async def test_samples_user1(
+    sample_repository: SampleRepository, test_user1: User
+) -> list[Sample]:
     """Create test samples for user1."""
     samples_data = [
         {
@@ -128,7 +129,7 @@ async def test_samples_user1(sample_repository: SampleRepository, test_user1: Us
         },
         {
             "sample_type": SampleType.BLOOD,
-            "subject_id": "P002", 
+            "subject_id": "P002",
             "collection_date": date(2024, 1, 16),
             "status": SampleStatus.PROCESSING,
             "storage_location": "freezer-1-rowB",
@@ -143,23 +144,25 @@ async def test_samples_user1(sample_repository: SampleRepository, test_user1: Us
             "user_id": test_user1.id,
         },
     ]
-    
+
     samples = []
     for sample_data in samples_data:
         sample = await sample_repository.create_sample(sample_data)
         samples.append(sample)
-    
+
     return samples
 
 
 @pytest_asyncio.fixture
-async def test_samples_user2(sample_repository: SampleRepository, test_user2: User) -> list[Sample]:
+async def test_samples_user2(
+    sample_repository: SampleRepository, test_user2: User
+) -> list[Sample]:
     """Create test samples for user2."""
     samples_data = [
         {
             "sample_type": SampleType.BLOOD,
             "subject_id": "S001",
-            "collection_date": date(2024, 2, 1), 
+            "collection_date": date(2024, 2, 1),
             "status": SampleStatus.COLLECTED,
             "storage_location": "freezer-3-rowA",
             "user_id": test_user2.id,
@@ -177,14 +180,14 @@ async def test_samples_user2(sample_repository: SampleRepository, test_user2: Us
             "subject_id": "S003",
             "collection_date": date(2024, 2, 3),
             "status": SampleStatus.COLLECTED,
-            "storage_location": "room-1-shelfB", 
+            "storage_location": "room-1-shelfB",
             "user_id": test_user2.id,
         },
     ]
-    
+
     samples = []
     for sample_data in samples_data:
         sample = await sample_repository.create_sample(sample_data)
         samples.append(sample)
-    
+
     return samples

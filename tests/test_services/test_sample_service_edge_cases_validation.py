@@ -4,17 +4,22 @@ Edge Cases and Validation Tests for Clinical Sample Service.
 These tests focus on input validation, error handling, and edge cases
 to ensure robust and secure operation under various conditions.
 """
-import pytest
 from datetime import date, timedelta
-from uuid import uuid4, UUID
-from typing import Dict, Any
+# from typing import Any, Dict  # Removed unused import
+from uuid import uuid4
 
+import pytest
 from pydantic import ValidationError as PydanticValidationError
 
-from app.core.exceptions import ValidationError, NotFoundError
-from app.models.sample import SampleType, SampleStatus
+from app.core.exceptions import NotFoundError
+from app.models.sample import SampleStatus, SampleType
 from app.models.user import User
-from app.schemas.sample import SampleCreate, SampleUpdate, SampleFilter, SampleListResponse
+from app.schemas.sample import (
+    SampleCreate,
+    SampleFilter,
+    SampleListResponse,
+    SampleUpdate,
+)
 from app.services.sample_service import SampleService
 
 
@@ -31,7 +36,7 @@ class TestPaginationValidation:
     ):
         """
         Test that service correctly handles pagination parameters.
-        
+
         Note: Validation of skip/limit ranges is handled by FastAPI Query validators
         at the API layer. This test verifies the service processes valid parameters correctly.
         """
@@ -42,7 +47,9 @@ class TestPaginationValidation:
             limit=10,
             current_user=test_user1,
         )
-        assert isinstance(result, SampleListResponse), "Should return valid response for valid parameters"
+        assert isinstance(
+            result, SampleListResponse
+        ), "Should return valid response for valid parameters"
         assert result.skip == 0, "Skip should be preserved"
         assert result.limit == 10, "Limit should be preserved"
 
@@ -65,7 +72,9 @@ class TestPaginationValidation:
         )
         assert isinstance(result, SampleListResponse), "Should handle large skip values"
         assert result.skip == 1000, "Large skip should be preserved"
-        assert len(result.samples) == 0, "Should return empty list when skip exceeds data"
+        assert (
+            len(result.samples) == 0
+        ), "Should return empty list when skip exceeds data"
 
     async def test_pagination_boundary_values(
         self,
@@ -80,7 +89,9 @@ class TestPaginationValidation:
             limit=1,
             current_user=test_user1,
         )
-        assert isinstance(result, SampleListResponse), "Should return valid response for minimum values"
+        assert isinstance(
+            result, SampleListResponse
+        ), "Should return valid response for minimum values"
         assert result.skip == 0, "Skip should be preserved"
         assert result.limit == 1, "Limit should be preserved"
 
@@ -91,7 +102,9 @@ class TestPaginationValidation:
             limit=1000,
             current_user=test_user1,
         )
-        assert isinstance(result, SampleListResponse), "Should return valid response for maximum limit"
+        assert isinstance(
+            result, SampleListResponse
+        ), "Should return valid response for maximum limit"
         assert result.limit == 1000, "Maximum limit should be preserved"
 
         # Test large skip value (should not error)
@@ -101,7 +114,9 @@ class TestPaginationValidation:
             limit=10,
             current_user=test_user1,
         )
-        assert isinstance(result, SampleListResponse), "Should handle large skip values gracefully"
+        assert isinstance(
+            result, SampleListResponse
+        ), "Should handle large skip values gracefully"
         assert result.skip == 1000000, "Large skip should be preserved"
         assert len(result.samples) == 0, "Should return empty list for skip beyond data"
 
@@ -119,53 +134,60 @@ class TestInvalidUUIDHandling:
     ):
         """
         Test that invalid UUID in sample_id is handled gracefully.
-        
+
         This ensures the system properly validates UUIDs and returns
         appropriate errors rather than crashing.
         """
         # Test completely invalid UUID string - this should be caught by FastAPI/Pydantic
         # before reaching the service layer, but we test service layer robustness
-        
+
         # Generate a properly formatted but non-existent UUID
         non_existent_uuid = uuid4()
-        
+
         # Should raise NotFoundError for non-existent sample
         with pytest.raises(NotFoundError) as exc_info:
             await sample_service.get_sample_by_id(non_existent_uuid, test_user1)
-        
+
         assert "Sample" in str(exc_info.value), "Error should mention sample not found"
-        assert str(non_existent_uuid) in str(exc_info.value), "Error should include the UUID"
+        assert str(non_existent_uuid) in str(
+            exc_info.value
+        ), "Error should include the UUID"
 
         # Test update with non-existent UUID
         with pytest.raises(NotFoundError) as exc_info:
             await sample_service.update_sample(
                 non_existent_uuid,
                 SampleUpdate(status=SampleStatus.PROCESSING),
-                test_user1
+                test_user1,
             )
-        
-        assert "Sample" in str(exc_info.value), "Update should fail for non-existent sample"
+
+        assert "Sample" in str(
+            exc_info.value
+        ), "Update should fail for non-existent sample"
 
         # Test delete with non-existent UUID
         with pytest.raises(NotFoundError) as exc_info:
             await sample_service.delete_sample(non_existent_uuid, test_user1)
-        
-        assert "Sample" in str(exc_info.value), "Delete should fail for non-existent sample"
+
+        assert "Sample" in str(
+            exc_info.value
+        ), "Delete should fail for non-existent sample"
 
     async def test_malformed_uuid_strings(self):
         """Test that malformed UUID strings are rejected at the schema level."""
         # These should be caught by Pydantic validation before reaching service layer
-        
+
         # Test invalid UUID format in response schema
         with pytest.raises(PydanticValidationError):
             # This simulates what happens when trying to create a response with invalid UUID
-            from app.schemas.sample import SampleResponse
             from datetime import datetime
-            
+
+            from app.schemas.sample import SampleResponse
+
             # This should fail validation
             SampleResponse(
                 id="not-a-uuid",  # Invalid UUID format
-                sample_id="also-not-a-uuid",  # Invalid UUID format  
+                sample_id="also-not-a-uuid",  # Invalid UUID format
                 sample_type=SampleType.BLOOD,
                 subject_id="P001",
                 collection_date=date.today(),
@@ -183,14 +205,13 @@ class TestSampleValidationEdgeCases:
 
     async def test_subject_id_business_validation(self):
         """Test core subject ID validation - business rule: letter + 3 digits."""
-        from app.schemas.sample import SampleCreate
 
         # Test valid subject ID format
         valid_sample = SampleCreate(
             sample_type=SampleType.BLOOD,
             subject_id="P001",
             collection_date=date.today() - timedelta(days=1),
-            storage_location="freezer-1-rowA"
+            storage_location="freezer-1-rowA",
         )
         assert valid_sample.subject_id == "P001", "Valid subject ID should be accepted"
 
@@ -199,9 +220,11 @@ class TestSampleValidationEdgeCases:
             sample_type=SampleType.BLOOD,
             subject_id="p001",  # lowercase
             collection_date=date.today() - timedelta(days=1),
-            storage_location="freezer-1-rowA"
+            storage_location="freezer-1-rowA",
         )
-        assert mixed_case_sample.subject_id == "P001", "Subject ID should be converted to uppercase"
+        assert (
+            mixed_case_sample.subject_id == "P001"
+        ), "Subject ID should be converted to uppercase"
 
         # Test key invalid patterns (business rule violations)
         with pytest.raises(PydanticValidationError):
@@ -209,7 +232,7 @@ class TestSampleValidationEdgeCases:
                 sample_type=SampleType.BLOOD,
                 subject_id="001",  # Missing letter prefix
                 collection_date=date.today() - timedelta(days=1),
-                storage_location="freezer-1-rowA"
+                storage_location="freezer-1-rowA",
             )
 
         with pytest.raises(PydanticValidationError):
@@ -217,21 +240,22 @@ class TestSampleValidationEdgeCases:
                 sample_type=SampleType.BLOOD,
                 subject_id="P1",  # Too few digits
                 collection_date=date.today() - timedelta(days=1),
-                storage_location="freezer-1-rowA"
+                storage_location="freezer-1-rowA",
             )
 
     async def test_collection_date_business_validation(self):
         """Test core collection date business rules - no future dates, max 10 years old."""
-        from app.schemas.sample import SampleCreate
 
         # Test valid dates
         today_sample = SampleCreate(
             sample_type=SampleType.BLOOD,
             subject_id="P001",
             collection_date=date.today(),
-            storage_location="freezer-1-rowA"
+            storage_location="freezer-1-rowA",
         )
-        assert today_sample.collection_date == date.today(), "Today's date should be valid"
+        assert (
+            today_sample.collection_date == date.today()
+        ), "Today's date should be valid"
 
         # Test future date (business rule violation)
         with pytest.raises(PydanticValidationError):
@@ -239,7 +263,7 @@ class TestSampleValidationEdgeCases:
                 sample_type=SampleType.BLOOD,
                 subject_id="P001",
                 collection_date=date.today() + timedelta(days=1),  # Tomorrow
-                storage_location="freezer-1-rowA"
+                storage_location="freezer-1-rowA",
             )
 
         # Test very old date (business rule violation)
@@ -249,34 +273,36 @@ class TestSampleValidationEdgeCases:
                 sample_type=SampleType.BLOOD,
                 subject_id="P001",
                 collection_date=very_old_date,
-                storage_location="freezer-1-rowA"
+                storage_location="freezer-1-rowA",
             )
 
     async def test_storage_location_format_validation(self):
         """Test storage location format business rule."""
-        from app.schemas.sample import SampleCreate
 
         # Test valid format
         valid_sample = SampleCreate(
             sample_type=SampleType.BLOOD,
             subject_id="P001",
             collection_date=date.today() - timedelta(days=1),
-            storage_location="freezer-1-rowA"
+            storage_location="freezer-1-rowA",
         )
-        assert valid_sample.storage_location == "freezer-1-rowA", "Valid location format should be accepted"
+        assert (
+            valid_sample.storage_location == "freezer-1-rowA"
+        ), "Valid location format should be accepted"
 
     async def test_tissue_sample_storage_business_rule(self):
         """Test critical business rule: tissue samples must be stored in freezer."""
-        from app.schemas.sample import SampleCreate
 
         # Tissue sample with freezer storage (should be valid)
         valid_tissue = SampleCreate(
             sample_type=SampleType.TISSUE,
             subject_id="P001",
             collection_date=date.today() - timedelta(days=1),
-            storage_location="freezer-1-rowA"
+            storage_location="freezer-1-rowA",
         )
-        assert valid_tissue.sample_type == SampleType.TISSUE, "Valid tissue sample should be accepted"
+        assert (
+            valid_tissue.sample_type == SampleType.TISSUE
+        ), "Valid tissue sample should be accepted"
 
         # Tissue sample with room storage (business rule violation)
         with pytest.raises(PydanticValidationError):
@@ -284,7 +310,7 @@ class TestSampleValidationEdgeCases:
                 sample_type=SampleType.TISSUE,
                 subject_id="P001",
                 collection_date=date.today() - timedelta(days=1),
-                storage_location="room-1-shelfA"  # Invalid for tissue
+                storage_location="room-1-shelfA",  # Invalid for tissue
             )
 
 
@@ -303,19 +329,22 @@ class TestFilterValidationEdgeCases:
             collection_date_from=date.today() - timedelta(days=30),
             collection_date_to=date.today() - timedelta(days=1),
         )
-        assert valid_filter.collection_date_from is not None, "Valid date range should be accepted"
+        assert (
+            valid_filter.collection_date_from is not None
+        ), "Valid date range should be accepted"
 
         # Invalid: from date after to date (critical business rule)
         with pytest.raises(PydanticValidationError):
             SampleFilter(
                 collection_date_from=date.today() - timedelta(days=1),
-                collection_date_to=date.today() - timedelta(days=30),  # Earlier than from date
+                collection_date_to=date.today()
+                - timedelta(days=30),  # Earlier than from date
             )
 
 
 @pytest.mark.asyncio
 @pytest.mark.validation
-@pytest.mark.edge_cases  
+@pytest.mark.edge_cases
 class TestSampleUpdateValidation:
     """Test validation in sample update scenarios."""
 
@@ -348,14 +377,18 @@ class TestSystemRobustness:
         """Test that multiple sequential operations return consistent results."""
         # Multiple get_samples calls should all work independently
         filter_obj = SampleFilter()
-        
+
         # Sequential requests should return consistent results
         result1 = await sample_service.get_samples(filter_obj, 0, 10, test_user1)
         result2 = await sample_service.get_samples(filter_obj, 0, 10, test_user1)
-        
+
         # Results should be identical and valid
-        assert result1.total == result2.total, "Sequential calls should return consistent results"
-        assert len(result1.samples) == len(result2.samples), "Sample counts should be consistent"
+        assert (
+            result1.total == result2.total
+        ), "Sequential calls should return consistent results"
+        assert len(result1.samples) == len(
+            result2.samples
+        ), "Sample counts should be consistent"
 
     async def test_large_skip_values_handling(
         self,
@@ -369,6 +402,10 @@ class TestSystemRobustness:
             limit=1,
             current_user=test_user1,
         )
-        assert isinstance(result, SampleListResponse), "Should handle large skip values gracefully"
+        assert isinstance(
+            result, SampleListResponse
+        ), "Should handle large skip values gracefully"
         assert result.skip == 999999, "Skip value should be preserved"
-        assert len(result.samples) == 0, "Should return empty list when skip exceeds data"
+        assert (
+            len(result.samples) == 0
+        ), "Should return empty list when skip exceeds data"
