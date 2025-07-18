@@ -67,7 +67,7 @@ class SampleCreate(SampleBase):
         default=SampleStatus.COLLECTED,
         description="Current processing status of sample",
     )
-    
+
     class Config:
         json_schema_extra = {
             "example": {
@@ -75,7 +75,7 @@ class SampleCreate(SampleBase):
                 "subject_id": "P001",
                 "collection_date": "2023-12-01",
                 "storage_location": "freezer-1-rowA",
-                "status": "collected"
+                "status": "collected",
             }
         }
 
@@ -96,13 +96,10 @@ class SampleUpdate(BaseModel):
     storage_location: Optional[str] = Field(
         None, max_length=255, description="Physical storage location identifier"
     )
-    
+
     class Config:
         json_schema_extra = {
-            "example": {
-                "status": "processing",
-                "storage_location": "freezer-2-rowB"
-            }
+            "example": {"status": "processing", "storage_location": "freezer-2-rowB"}
         }
 
     @validator("subject_id")

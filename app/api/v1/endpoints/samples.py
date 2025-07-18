@@ -41,10 +41,10 @@ router = APIRouter()
                         "status": "collected",
                         "storage_location": "freezer-1-rowA",
                         "created_at": "2023-12-01T10:00:00Z",
-                        "updated_at": "2023-12-01T10:00:00Z"
+                        "updated_at": "2023-12-01T10:00:00Z",
                     }
                 }
-            }
+            },
         },
         400: {
             "description": "Validation error - invalid sample data",
@@ -54,11 +54,14 @@ router = APIRouter()
                         "error": True,
                         "message": "Tissue samples must be stored in freezer",
                         "error_code": "VALIDATION_ERROR",
-                        "details": {"field": "storage_location", "value": "room-1-shelfA"},
-                        "timestamp": "2023-12-01T10:00:00Z"
+                        "details": {
+                            "field": "storage_location",
+                            "value": "room-1-shelfA",
+                        },
+                        "timestamp": "2023-12-01T10:00:00Z",
                     }
                 }
-            }
+            },
         },
         401: {
             "description": "Authentication required",
@@ -69,12 +72,12 @@ router = APIRouter()
                         "message": "Token has expired",
                         "error_code": "AUTHENTICATION_ERROR",
                         "details": {},
-                        "timestamp": "2023-12-01T10:00:00Z"
+                        "timestamp": "2023-12-01T10:00:00Z",
                     }
                 }
-            }
-        }
-    }
+            },
+        },
+    },
 )
 async def create_sample(
     sample_data: SampleCreate,
@@ -156,7 +159,7 @@ async def create_sample(
                                 "status": "collected",
                                 "storage_location": "freezer-1-rowA",
                                 "created_at": "2023-12-01T10:00:00Z",
-                                "updated_at": "2023-12-01T10:00:00Z"
+                                "updated_at": "2023-12-01T10:00:00Z",
                             },
                             {
                                 "id": "550e8400-e29b-41d4-a716-446655440002",
@@ -167,15 +170,15 @@ async def create_sample(
                                 "status": "processing",
                                 "storage_location": "freezer-2-rowB",
                                 "created_at": "2023-12-02T11:00:00Z",
-                                "updated_at": "2023-12-02T11:00:00Z"
-                            }
+                                "updated_at": "2023-12-02T11:00:00Z",
+                            },
                         ],
                         "total": 2,
                         "skip": 0,
-                        "limit": 100
+                        "limit": 100,
                     }
                 }
-            }
+            },
         },
         400: {
             "description": "Invalid filter parameters",
@@ -186,10 +189,10 @@ async def create_sample(
                         "message": "Collection date to must be after collection date from",
                         "error_code": "VALIDATION_ERROR",
                         "details": {"field": "collection_date_to"},
-                        "timestamp": "2023-12-01T10:00:00Z"
+                        "timestamp": "2023-12-01T10:00:00Z",
                     }
                 }
-            }
+            },
         },
         401: {
             "description": "Authentication required",
@@ -200,12 +203,12 @@ async def create_sample(
                         "message": "Token has expired",
                         "error_code": "AUTHENTICATION_ERROR",
                         "details": {},
-                        "timestamp": "2023-12-01T10:00:00Z"
+                        "timestamp": "2023-12-01T10:00:00Z",
                     }
                 }
-            }
-        }
-    }
+            },
+        },
+    },
 )
 async def get_samples(
     skip: int = Query(0, ge=0, description="Number of samples to skip for pagination"),
@@ -218,7 +221,9 @@ async def get_samples(
     sample_status: Optional[SampleStatus] = Query(
         None, description="Filter by sample status: collected, processing, or archived"
     ),
-    subject_id: Optional[str] = Query(None, description="Filter by subject ID (e.g., P001)"),
+    subject_id: Optional[str] = Query(
+        None, description="Filter by subject ID (e.g., P001)"
+    ),
     collection_date_from: Optional[str] = Query(
         None, description="Filter by collection date from (YYYY-MM-DD format)"
     ),
@@ -310,10 +315,10 @@ async def get_samples(
                         "status": "collected",
                         "storage_location": "freezer-1-rowA",
                         "created_at": "2023-12-01T10:00:00Z",
-                        "updated_at": "2023-12-01T10:00:00Z"
+                        "updated_at": "2023-12-01T10:00:00Z",
                     }
                 }
-            }
+            },
         },
         404: {
             "description": "Sample not found",
@@ -323,11 +328,13 @@ async def get_samples(
                         "error": True,
                         "message": "Sample not found",
                         "error_code": "NOT_FOUND_ERROR",
-                        "details": {"sample_id": "550e8400-e29b-41d4-a716-446655440000"},
-                        "timestamp": "2023-12-01T10:00:00Z"
+                        "details": {
+                            "sample_id": "550e8400-e29b-41d4-a716-446655440000"
+                        },
+                        "timestamp": "2023-12-01T10:00:00Z",
                     }
                 }
-            }
+            },
         },
         401: {
             "description": "Authentication required",
@@ -338,12 +345,12 @@ async def get_samples(
                         "message": "Token has expired",
                         "error_code": "AUTHENTICATION_ERROR",
                         "details": {},
-                        "timestamp": "2023-12-01T10:00:00Z"
+                        "timestamp": "2023-12-01T10:00:00Z",
                     }
                 }
-            }
-        }
-    }
+            },
+        },
+    },
 )
 async def get_sample(
     sample_id: UUID,
@@ -408,10 +415,10 @@ async def get_sample(
                         "status": "processing",
                         "storage_location": "freezer-2-rowB",
                         "created_at": "2023-12-01T10:00:00Z",
-                        "updated_at": "2023-12-01T15:30:00Z"
+                        "updated_at": "2023-12-01T15:30:00Z",
                     }
                 }
-            }
+            },
         },
         400: {
             "description": "Validation error",
@@ -422,10 +429,10 @@ async def get_sample(
                         "message": "Collection date cannot be in the future",
                         "error_code": "VALIDATION_ERROR",
                         "details": {"field": "collection_date"},
-                        "timestamp": "2023-12-01T10:00:00Z"
+                        "timestamp": "2023-12-01T10:00:00Z",
                     }
                 }
-            }
+            },
         },
         404: {
             "description": "Sample not found",
@@ -435,13 +442,15 @@ async def get_sample(
                         "error": True,
                         "message": "Sample not found",
                         "error_code": "NOT_FOUND_ERROR",
-                        "details": {"sample_id": "550e8400-e29b-41d4-a716-446655440000"},
-                        "timestamp": "2023-12-01T10:00:00Z"
+                        "details": {
+                            "sample_id": "550e8400-e29b-41d4-a716-446655440000"
+                        },
+                        "timestamp": "2023-12-01T10:00:00Z",
                     }
                 }
-            }
-        }
-    }
+            },
+        },
+    },
 )
 async def update_sample(
     sample_id: UUID,
@@ -504,10 +513,10 @@ async def update_sample(
                 "application/json": {
                     "example": {
                         "message": "Sample deleted successfully",
-                        "sample_id": "550e8400-e29b-41d4-a716-446655440000"
+                        "sample_id": "550e8400-e29b-41d4-a716-446655440000",
                     }
                 }
-            }
+            },
         },
         404: {
             "description": "Sample not found",
@@ -517,11 +526,13 @@ async def update_sample(
                         "error": True,
                         "message": "Sample not found",
                         "error_code": "NOT_FOUND_ERROR",
-                        "details": {"sample_id": "550e8400-e29b-41d4-a716-446655440000"},
-                        "timestamp": "2023-12-01T10:00:00Z"
+                        "details": {
+                            "sample_id": "550e8400-e29b-41d4-a716-446655440000"
+                        },
+                        "timestamp": "2023-12-01T10:00:00Z",
                     }
                 }
-            }
+            },
         },
         401: {
             "description": "Authentication required",
@@ -532,12 +543,12 @@ async def update_sample(
                         "message": "Token has expired",
                         "error_code": "AUTHENTICATION_ERROR",
                         "details": {},
-                        "timestamp": "2023-12-01T10:00:00Z"
+                        "timestamp": "2023-12-01T10:00:00Z",
                     }
                 }
-            }
-        }
-    }
+            },
+        },
+    },
 )
 async def delete_sample(
     sample_id: UUID,
@@ -602,7 +613,7 @@ async def delete_sample(
                             "status": "collected",
                             "storage_location": "freezer-1-rowA",
                             "created_at": "2023-12-01T10:00:00Z",
-                            "updated_at": "2023-12-01T10:00:00Z"
+                            "updated_at": "2023-12-01T10:00:00Z",
                         },
                         {
                             "id": "550e8400-e29b-41d4-a716-446655440002",
@@ -613,11 +624,11 @@ async def delete_sample(
                             "status": "processing",
                             "storage_location": "room-1-shelfB",
                             "created_at": "2023-12-03T14:00:00Z",
-                            "updated_at": "2023-12-03T14:00:00Z"
-                        }
+                            "updated_at": "2023-12-03T14:00:00Z",
+                        },
                     ]
                 }
-            }
+            },
         },
         404: {
             "description": "Subject not found or no samples",
@@ -628,10 +639,10 @@ async def delete_sample(
                         "message": "No samples found for subject P001",
                         "error_code": "NOT_FOUND_ERROR",
                         "details": {"subject_id": "P001"},
-                        "timestamp": "2023-12-01T10:00:00Z"
+                        "timestamp": "2023-12-01T10:00:00Z",
                     }
                 }
-            }
+            },
         },
         401: {
             "description": "Authentication required",
@@ -642,12 +653,12 @@ async def delete_sample(
                         "message": "Token has expired",
                         "error_code": "AUTHENTICATION_ERROR",
                         "details": {},
-                        "timestamp": "2023-12-01T10:00:00Z"
+                        "timestamp": "2023-12-01T10:00:00Z",
                     }
                 }
-            }
-        }
-    }
+            },
+        },
+    },
 )
 async def get_samples_by_subject(
     subject_id: str,
@@ -713,25 +724,21 @@ async def get_samples_by_subject(
                         "by_status": {
                             "collected": 50,
                             "processing": 75,
-                            "archived": 25
+                            "archived": 25,
                         },
-                        "by_type": {
-                            "blood": 80,
-                            "saliva": 40,
-                            "tissue": 30
-                        },
+                        "by_type": {"blood": 80, "saliva": 40, "tissue": 30},
                         "collection_date_range": {
                             "earliest": "2023-01-15",
-                            "latest": "2023-12-01"
+                            "latest": "2023-12-01",
                         },
                         "unique_subjects": 45,
                         "storage_locations": {
                             "freezer_locations": 8,
-                            "room_locations": 3
-                        }
+                            "room_locations": 3,
+                        },
                     }
                 }
-            }
+            },
         },
         401: {
             "description": "Authentication required",
@@ -742,12 +749,12 @@ async def get_samples_by_subject(
                         "message": "Token has expired",
                         "error_code": "AUTHENTICATION_ERROR",
                         "details": {},
-                        "timestamp": "2023-12-01T10:00:00Z"
+                        "timestamp": "2023-12-01T10:00:00Z",
                     }
                 }
-            }
-        }
-    }
+            },
+        },
+    },
 )
 async def get_sample_statistics(
     db: AsyncSession = Depends(get_database),

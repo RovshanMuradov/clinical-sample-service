@@ -28,10 +28,10 @@ router = APIRouter()
                         "email": "john.doe@research.edu",
                         "is_active": True,
                         "created_at": "2023-12-01T10:00:00Z",
-                        "updated_at": "2023-12-01T10:00:00Z"
+                        "updated_at": "2023-12-01T10:00:00Z",
                     }
                 }
-            }
+            },
         },
         400: {
             "description": "Validation error - invalid input data",
@@ -42,10 +42,10 @@ router = APIRouter()
                         "message": "Password must contain at least one uppercase letter",
                         "error_code": "VALIDATION_ERROR",
                         "details": {"field": "password", "issue": "missing_uppercase"},
-                        "timestamp": "2023-12-01T10:00:00Z"
+                        "timestamp": "2023-12-01T10:00:00Z",
                     }
                 }
-            }
+            },
         },
         409: {
             "description": "User already exists - email or username taken",
@@ -56,12 +56,12 @@ router = APIRouter()
                         "message": "Email already registered",
                         "error_code": "CONFLICT_ERROR",
                         "details": {"field": "email", "value": "john.doe@research.edu"},
-                        "timestamp": "2023-12-01T10:00:00Z"
+                        "timestamp": "2023-12-01T10:00:00Z",
                     }
                 }
-            }
-        }
-    }
+            },
+        },
+    },
 )
 async def register(user_data: UserCreate, db: AsyncSession = Depends(get_database)):
     """
@@ -105,10 +105,10 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_databas
                 "application/json": {
                     "example": {
                         "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqb2huLmRvZUByZXNlYXJjaC5lZHUiLCJleHAiOjE2NzAzMjgwMDB9.signature",
-                        "token_type": "bearer"
+                        "token_type": "bearer",
                     }
                 }
-            }
+            },
         },
         400: {
             "description": "Invalid request data",
@@ -119,10 +119,10 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_databas
                         "message": "Email cannot be empty",
                         "error_code": "VALIDATION_ERROR",
                         "details": {"field": "email"},
-                        "timestamp": "2023-12-01T10:00:00Z"
+                        "timestamp": "2023-12-01T10:00:00Z",
                     }
                 }
-            }
+            },
         },
         401: {
             "description": "Invalid credentials or inactive account",
@@ -133,10 +133,10 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_databas
                         "message": "Invalid email or password",
                         "error_code": "AUTHENTICATION_ERROR",
                         "details": {},
-                        "timestamp": "2023-12-01T10:00:00Z"
+                        "timestamp": "2023-12-01T10:00:00Z",
                     }
                 }
-            }
+            },
         },
         429: {
             "description": "Too many login attempts",
@@ -147,12 +147,12 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_databas
                         "message": "Too many requests",
                         "error_code": "RATE_LIMIT_ERROR",
                         "details": {"retry_after": 60},
-                        "timestamp": "2023-12-01T10:00:00Z"
+                        "timestamp": "2023-12-01T10:00:00Z",
                     }
                 }
-            }
-        }
-    }
+            },
+        },
+    },
 )
 async def login(login_data: UserLogin, db: AsyncSession = Depends(get_database)):
     """
@@ -206,10 +206,10 @@ async def login(login_data: UserLogin, db: AsyncSession = Depends(get_database))
                 "application/json": {
                     "example": {
                         "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqb2huLmRvZUByZXNlYXJjaC5lZHUiLCJleHAiOjE2NzAzMzAwMDB9.signature",
-                        "token_type": "bearer"
+                        "token_type": "bearer",
                     }
                 }
-            }
+            },
         },
         401: {
             "description": "Invalid or expired token",
@@ -220,10 +220,10 @@ async def login(login_data: UserLogin, db: AsyncSession = Depends(get_database))
                         "message": "Token has expired",
                         "error_code": "AUTHENTICATION_ERROR",
                         "details": {},
-                        "timestamp": "2023-12-01T10:00:00Z"
+                        "timestamp": "2023-12-01T10:00:00Z",
                     }
                 }
-            }
+            },
         },
         403: {
             "description": "User account is inactive",
@@ -234,12 +234,12 @@ async def login(login_data: UserLogin, db: AsyncSession = Depends(get_database))
                         "message": "User account is inactive",
                         "error_code": "AUTHORIZATION_ERROR",
                         "details": {},
-                        "timestamp": "2023-12-01T10:00:00Z"
+                        "timestamp": "2023-12-01T10:00:00Z",
                     }
                 }
-            }
-        }
-    }
+            },
+        },
+    },
 )
 async def refresh_token(
     current_user: User = Depends(get_current_user),

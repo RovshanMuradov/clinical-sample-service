@@ -182,9 +182,9 @@ pytest tests/test_auth.py -v
 
 **Comprehensive project documentation and testing results:**
 
-- **[TODO.md](TODO.md)** - Complete project implementation plan and progress tracking
-- **[TESTING_API.md](TESTING_API.md)** - Live API testing results (9/10 tests passed, data isolation verified)
-- **[TESTING_REPORT.md](TESTING_REPORT.md)** - Unit testing report (41/41 tests passed, 46.17% coverage)
+- **[TODO.md](docs/TODO.md)** - Complete project implementation plan and progress tracking
+- **[TESTING_API.md](docs/TESTING_API.md)** - Live API testing results (9/10 tests passed, data isolation verified)
+- **[TESTING_REPORT.md](docs/TESTING_REPORT.md)** - Unit testing report (41/41 tests passed, 46.17% coverage)
 
 **Key Testing Highlights:**
 - ✅ **Security**: Data isolation, JWT authentication, password validation

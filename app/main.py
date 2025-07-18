@@ -66,22 +66,22 @@ app = FastAPI(
     version=settings.app_version,
     description="""
     ## Clinical Sample Service API
-    
+
     A microservice for managing clinical samples (blood, saliva, tissue) in clinical trials.
-    
+
     ### Features:
     - **Authentication**: JWT-based authentication with user registration and login
     - **Sample Management**: Complete CRUD operations for clinical samples
     - **Data Filtering**: Advanced filtering by type, status, subject ID, and collection date
     - **Statistics**: Overview statistics for sample data
     - **Security**: Role-based access control with data isolation between users
-    
+
     ### Security:
     - All endpoints (except authentication) require a valid JWT token
     - Users can only access their own samples (data isolation)
     - Passwords are securely hashed using bcrypt
     - Rate limiting and request timeout protection
-    
+
     ### Data Models:
     - **Sample Types**: blood, saliva, tissue
     - **Sample Status**: collected, processing, archived
@@ -132,13 +132,14 @@ security_scheme = HTTPBearer(
     description="Enter JWT token obtained from /api/v1/auth/login endpoint",
 )
 
+
 # Add security scheme to OpenAPI
 def custom_openapi():
     if app.openapi_schema:
         return app.openapi_schema
-    
+
     from fastapi.openapi.utils import get_openapi
-    
+
     openapi_schema = get_openapi(
         title=app.title,
         version=app.version,
@@ -146,7 +147,7 @@ def custom_openapi():
         routes=app.routes,
         servers=[{"url": "/", "description": "Current server"}],
     )
-    
+
     # Add security scheme
     openapi_schema["components"]["securitySchemes"] = {
         "bearerAuth": {
@@ -156,11 +157,13 @@ def custom_openapi():
             "description": "JWT token obtained from /api/v1/auth/login endpoint. Format: Bearer <token>",
         }
     }
-    
+
     app.openapi_schema = openapi_schema
     return app.openapi_schema
 
-app.openapi = custom_openapi
+
+# Override the openapi method
+app.openapi = custom_openapi  # type: ignore[method-assign]
 
 # Add CORS middleware with production-ready settings
 cors_methods = ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"]
