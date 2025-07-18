@@ -99,16 +99,8 @@ class SampleService:
         Returns:
             SampleListResponse: List of samples with pagination info
         """
-        # Validate pagination parameters
-        if skip < 0:
-            raise ValidationError(
-                message="Skip parameter must be non-negative", field="skip"
-            )
-
-        if limit <= 0 or limit > 1000:
-            raise ValidationError(
-                message="Limit parameter must be between 1 and 1000", field="limit"
-            )
+        # Note: Pagination parameters are validated by FastAPI Query validators
+        # at the API layer, so no additional validation needed here
 
         # Filter samples by current user to ensure data isolation
         if current_user:

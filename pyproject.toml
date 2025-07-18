@@ -65,7 +65,10 @@ markers = [
     "integration: marks tests as integration tests",
     "unit: marks tests as unit tests",
     "auth: marks tests related to authentication",
-    "samples: marks tests related to samples management"
+    "samples: marks tests related to samples management",
+    "crud: marks tests related to basic CRUD operations",
+    "validation: marks tests related to input validation",
+    "edge_cases: marks tests that test edge cases and boundary conditions"
 ]
 
 [tool.coverage.run]
