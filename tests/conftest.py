@@ -24,8 +24,6 @@ from app.services.sample_service import SampleService
 # from unittest.mock import AsyncMock  # Removed unused import
 
 
-
-
 # Test database URL (SQLite in-memory for fast tests)
 SQLALCHEMY_TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 

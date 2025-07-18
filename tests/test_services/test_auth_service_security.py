@@ -25,8 +25,6 @@ from app.services.auth_service import AuthService
 # from unittest.mock import patch  # Removed unused import
 
 
-
-
 class TestPasswordSecurity:
     """Test password hashing and verification security."""
 

@@ -24,8 +24,6 @@ from app.services.sample_service import SampleService
 # from uuid import uuid4  # Removed unused import
 
 
-
-
 @pytest.mark.asyncio
 @pytest.mark.auth
 @pytest.mark.samples
