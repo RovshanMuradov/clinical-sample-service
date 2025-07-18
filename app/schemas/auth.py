@@ -49,6 +49,15 @@ class UserCreate(UserBase):
     password: str = Field(
         ..., min_length=8, max_length=100, description="User password"
     )
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "username": "researcher_john",
+                "email": "john.doe@research.edu",
+                "password": "SecurePass123!"
+            }
+        }
 
     @validator("password")
     def validate_password(cls, v):
@@ -161,6 +170,14 @@ class UserResponse(UserBase):
 class UserLogin(BaseModel):
     email: EmailStr = Field(..., description="User email address")
     password: str = Field(..., min_length=1, description="User password")
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "email": "john.doe@research.edu",
+                "password": "SecurePass123!"
+            }
+        }
 
     @validator("email")
     def validate_email_format(cls, v):
@@ -182,6 +199,14 @@ class UserLogin(BaseModel):
 class Token(BaseModel):
     access_token: str = Field(..., description="JWT access token")
     token_type: str = Field(default="bearer", description="Token type")
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqb2huLmRvZUByZXNlYXJjaC5lZHUiLCJleHAiOjE2NzAzMjgwMDB9.signature",
+                "token_type": "bearer"
+            }
+        }
 
 
 class TokenData(BaseModel):

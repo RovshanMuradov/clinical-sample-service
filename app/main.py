@@ -5,6 +5,7 @@ from datetime import datetime
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.security import HTTPBearer
 
 from .api.v1.api import api_router
 from .core.config import settings
@@ -59,17 +60,107 @@ async def lifespan(app: FastAPI):
     logger.info("Application shutdown complete")
 
 
-# Create FastAPI application with lifespan
+# Create FastAPI application with lifespan and enhanced OpenAPI configuration
 app = FastAPI(
     title=settings.app_name,
     version=settings.app_version,
-    description="A microservice for managing clinical samples in clinical trials",
+    description="""
+    ## Clinical Sample Service API
+    
+    A microservice for managing clinical samples (blood, saliva, tissue) in clinical trials.
+    
+    ### Features:
+    - **Authentication**: JWT-based authentication with user registration and login
+    - **Sample Management**: Complete CRUD operations for clinical samples
+    - **Data Filtering**: Advanced filtering by type, status, subject ID, and collection date
+    - **Statistics**: Overview statistics for sample data
+    - **Security**: Role-based access control with data isolation between users
+    
+    ### Security:
+    - All endpoints (except authentication) require a valid JWT token
+    - Users can only access their own samples (data isolation)
+    - Passwords are securely hashed using bcrypt
+    - Rate limiting and request timeout protection
+    
+    ### Data Models:
+    - **Sample Types**: blood, saliva, tissue
+    - **Sample Status**: collected, processing, archived
+    - **Subject ID Format**: Letter followed by 3+ digits (e.g., P001, S123)
+    - **Storage Location**: freezer-X-rowY or room-X-shelfY format
+    """,
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_url="/openapi.json",
     lifespan=lifespan,
     debug=settings.debug,
+    contact={
+        "name": "Clinical Sample Service API",
+        "url": "https://github.com/your-org/clinical-sample-service",
+        "email": "support@clinical-samples.com",
+    },
+    license_info={
+        "name": "MIT License",
+        "url": "https://opensource.org/licenses/MIT",
+    },
+    openapi_tags=[
+        {
+            "name": "Authentication",
+            "description": "User authentication and account management operations. No authentication required for these endpoints.",
+        },
+        {
+            "name": "Samples",
+            "description": "Clinical sample management operations. All endpoints require valid JWT authentication.",
+        },
+        {
+            "name": "Health",
+            "description": "System health check and status endpoints.",
+        },
+        {
+            "name": "Root",
+            "description": "Root API information endpoint.",
+        },
+        {
+            "name": "API Status",
+            "description": "API versioning and status information.",
+        },
+    ],
 )
+
+# Configure security scheme for Swagger UI
+security_scheme = HTTPBearer(
+    scheme_name="JWT",
+    description="Enter JWT token obtained from /api/v1/auth/login endpoint",
+)
+
+# Add security scheme to OpenAPI
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    
+    from fastapi.openapi.utils import get_openapi
+    
+    openapi_schema = get_openapi(
+        title=app.title,
+        version=app.version,
+        description=app.description,
+        routes=app.routes,
+        servers=[{"url": "/", "description": "Current server"}],
+    )
+    
+    # Add security scheme
+    openapi_schema["components"]["securitySchemes"] = {
+        "bearerAuth": {
+            "type": "http",
+            "scheme": "bearer",
+            "bearerFormat": "JWT",
+            "description": "JWT token obtained from /api/v1/auth/login endpoint. Format: Bearer <token>",
+        }
+    }
+    
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+app.openapi = custom_openapi
 
 # Add CORS middleware with production-ready settings
 cors_methods = ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"]
