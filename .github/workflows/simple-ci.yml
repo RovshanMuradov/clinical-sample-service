@@ -1,0 +1,77 @@
+name: Simple CI Debug
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  basic-test:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: test_clinical_samples_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3.11
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Set up environment variables
+      run: |
+        echo "DATABASE_URL=postgresql+asyncpg://test_user:test_password@localhost:5432/test_clinical_samples_db" >> .env
+        echo "SECRET_KEY=test-secret-key-for-ci-only" >> .env
+        echo "ALGORITHM=HS256" >> .env
+        echo "ACCESS_TOKEN_EXPIRE_MINUTES=30" >> .env
+        echo "DEBUG=False" >> .env
+        echo "LOG_LEVEL=INFO" >> .env
+
+    - name: Run database migrations
+      run: |
+        alembic upgrade head
+
+    - name: Run basic tests
+      run: |
+        python -c "import app.main; print('✅ App imports successfully')"
+        
+    - name: Test database connection
+      run: |
+        python -c "
+        import asyncio
+        from app.db.base import get_db
+        from app.core.config import settings
+        print('✅ Database config loaded')
+        print('DATABASE_URL:', settings.database_url[:50] + '...')
+        "
+
+    - name: Run pytest
+      run: |
+        pytest -v --tb=short
+
+    - name: Upload coverage to Codecov (optional)
+      if: success()
+      uses: codecov/codecov-action@v5
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        fail_ci_if_error: false
