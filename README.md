@@ -1,7 +1,9 @@
 # Clinical Sample Service
 
-[![CI Status](https://github.com/username/clinical-sample-service/workflows/CI/badge.svg)](https://github.com/username/clinical-sample-service/actions)
-[![Coverage](https://codecov.io/gh/username/clinical-sample-service/branch/main/graph/badge.svg)](https://codecov.io/gh/username/clinical-sample-service)
+[![CI Status](https://github.com/RovshanMuradov/clinical-sample-service/workflows/CI/badge.svg)](https://github.com/RovshanMuradov/clinical-sample-service/actions)
+[![Coverage](https://codecov.io/gh/RovshanMuradov/clinical-sample-service/branch/main/graph/badge.svg)](https://codecov.io/gh/RovshanMuradov/clinical-sample-service)
+[![Latest Release](https://img.shields.io/github/v/release/RovshanMuradov/clinical-sample-service)](https://github.com/RovshanMuradov/clinical-sample-service/releases)
+[![Code of Conduct](https://img.shields.io/badge/CoC-Contributor%20Covenant-brightgreen)](CODE_OF_CONDUCT.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A secure, production-ready REST API for managing clinical samples (blood, saliva, tissue) in medical research environments with enterprise-grade authentication and comprehensive API documentation.
@@ -30,13 +32,16 @@ A secure, production-ready REST API for managing clinical samples (blood, saliva
 - Medical industry compliance with business rule validation
 - Sample statistics and analytics dashboard
 
-**Technical Features:**
+<details>
+  <summary><strong>Technical Features</strong></summary>
+
 - Comprehensive API documentation with interactive testing
 - Request/response validation using Pydantic schemas
 - Async database operations with PostgreSQL and asyncpg
 - Automated database migrations with Alembic
 - Enterprise security features (rate limiting, security headers)
 - CI/CD pipeline with GitHub Actions
+</details>
 
 ## Technology Stack
 
@@ -61,10 +66,13 @@ A secure, production-ready REST API for managing clinical samples (blood, saliva
 ### Quick Start with Docker
 
 ```bash
-# Clone and run
-git clone <repository-url>
+# Option 1: Pull from Docker Hub (if available)
+docker pull rovshanmuradov/clinical-sample-service:latest
+
+# Option 2: Build from source
+git clone https://github.com/RovshanMuradov/clinical-sample-service.git
 cd clinical-sample-service
-docker-compose up --build
+docker compose up --build
 
 # API is now available at http://localhost:8000
 # Interactive documentation at http://localhost:8000/docs
@@ -82,7 +90,7 @@ pip install -r requirements.txt
 
 # Configure environment
 cp .env.example .env
-# Edit .env file with your database credentials
+# Edit .env file with your credentials
 
 # Run database migrations
 alembic upgrade head
@@ -91,11 +99,38 @@ alembic upgrade head
 uvicorn app.main:app --reload --port 8000
 ```
 
+#### Environment Variables
+
+| Variable | Description | Example |
+|----------|-------------|----------|
+| `DATABASE_URL` | PostgreSQL connection string | `postgresql+asyncpg://user:pass@localhost:5432/db` |
+| `SECRET_KEY` | JWT signing key (generate with `openssl rand -hex 32`) | `abc123...` |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | JWT token lifetime | `30` |
+| `DEBUG` | Enable debug mode | `True` / `False` |
+| `LOG_LEVEL` | Logging level | `INFO` / `DEBUG` / `ERROR` |
+| `RATE_LIMIT_PER_MINUTE` | API rate limit | `60` |
+| `REQUEST_TIMEOUT_SECONDS` | Request timeout | `30` |
+
 ## API Documentation
 
 - **Interactive API Explorer**: http://localhost:8000/docs
 - **Alternative Documentation**: http://localhost:8000/redoc
 - **OpenAPI Schema**: http://localhost:8000/openapi.json
+
+<details>
+  <summary>Endpoints Overview</summary>
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/v1/auth/register` | User registration |
+| `POST` | `/api/v1/auth/login` | User authentication |
+| `GET`  | `/api/v1/samples` | List samples with filtering |
+| `POST` | `/api/v1/samples` | Create new sample |
+| `GET`  | `/api/v1/samples/{id}` | Get sample by ID |
+| `PUT`  | `/api/v1/samples/{id}` | Update sample |
+| `DELETE` | `/api/v1/samples/{id}` | Delete sample |
+| `GET` | `/api/v1/samples/stats/overview` | Sample statistics |
+</details>
 
 ### Quick API Test
 
@@ -121,21 +156,31 @@ curl -X POST "http://localhost:8000/api/v1/samples/" \
 
 The application follows a clean layered architecture:
 
-```
-API Layer (FastAPI)
-    ↓
-Service Layer (Business Logic)
-    ↓
-Repository Layer (Data Access)
-    ↓
-Database (PostgreSQL)
+```mermaid
+graph TD
+    A[Client Request] --> B[FastAPI Router]
+    B --> C[Authentication Middleware]
+    C --> D[API Endpoints]
+    D --> E[Service Layer]
+    E --> F[Repository Layer]
+    F --> G[SQLAlchemy ORM]
+    G --> H[(PostgreSQL Database)]
+    
+    D --> I[Pydantic Schemas]
+    E --> J[Business Rules]
+    F --> K[Database Models]
+    
+    L[JWT Tokens] --> C
+    M[Rate Limiting] --> C
+    N[Security Headers] --> C
 ```
 
-- **API Layer**: FastAPI routes and endpoints with automatic validation
-- **Service Layer**: Business logic and validation rules
-- **Repository Layer**: Database operations abstraction
-- **Models**: SQLAlchemy ORM models
-- **Schemas**: Pydantic models for request/response validation
+**Layer Responsibilities:**
+- **API Layer**: FastAPI routes, request/response validation (Pydantic)
+- **Service Layer**: Business logic, medical compliance rules, user authorization
+- **Repository Layer**: Database operations abstraction, data access patterns
+- **Models**: SQLAlchemy ORM models with relationships and constraints
+- **Middleware**: Authentication, rate limiting, security headers, logging
 
 ## Security
 
@@ -147,10 +192,14 @@ Database (PostgreSQL)
 
 **API Protection:**
 - Rate limiting (60 requests/minute per IP)
-- Request timeout (30 seconds)
 - Comprehensive input validation
 - SQL injection protection via SQLAlchemy ORM
 - Security headers (X-Content-Type-Options, X-Frame-Options, CSP)
+
+**Performance & Hardening:**
+- Request timeout (30 seconds)
+- Payload size validation
+- Connection pooling with async database operations
 
 **Medical Data Compliance:**
 - Business rule validation for sample storage
@@ -161,7 +210,7 @@ Database (PostgreSQL)
 ## Testing
 
 - **Unit Tests**: 41 tests with 100% pass rate
-- **Code Coverage**: 46.17%
+- **Code Coverage**: Target 50% (current ~46%)
 - **Security Coverage**: 95% of critical risks covered
 - **Integration Tests**: All API endpoints tested
 
@@ -181,10 +230,11 @@ pytest tests/test_samples.py -v
 
 ### Key Design Decisions
 
-- **FastAPI over Django REST Framework**: Superior async performance and automatic OpenAPI generation
-- **JWT over Session-based Auth**: Better scalability for microservices architecture
-- **SQLAlchemy over Raw SQL**: Type safety, migrations, and SQL injection protection
-- **PostgreSQL with asyncpg**: Enterprise-grade reliability with async performance
+- **FastAPI over Django REST Framework**: Superior async performance and automatic OpenAPI generation, but requires more custom configuration
+- **JWT over Session-based Auth**: Better scalability for microservices, but harder token revocation and larger payload overhead
+- **SQLAlchemy over Raw SQL**: Type safety and SQL injection protection, but adds complexity for advanced queries
+- **Alembic over Prisma**: Better Python ecosystem integration, but more manual migration management
+- **PostgreSQL with asyncpg**: Enterprise reliability with async performance, but no built-in connection pooling
 
 ### Known Limitations
 
@@ -216,6 +266,3 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduc
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Version
-
-v1.0.0 - See [Releases](https://github.com/username/clinical-sample-service/releases) for version history.
