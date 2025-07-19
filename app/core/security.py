@@ -1,8 +1,9 @@
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
 
+import jwt
 from fastapi import HTTPException, status
-from jose import JWTError, jwt
+from jwt import InvalidTokenError
 from passlib.context import CryptContext
 
 from .config import settings
@@ -97,7 +98,7 @@ def verify_token(token: str) -> Dict[str, Any]:
             token, settings.secret_key, algorithms=[settings.algorithm]
         )
         return payload  # type: ignore
-    except JWTError:
+    except InvalidTokenError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
@@ -120,7 +121,7 @@ def decode_token(token: str) -> Optional[Dict[str, Any]]:
             token, settings.secret_key, algorithms=[settings.algorithm]
         )
         return payload  # type: ignore
-    except JWTError:
+    except InvalidTokenError:
         return None
 
 

@@ -51,7 +51,7 @@ A secure, production-ready REST API for managing clinical samples (blood, saliva
 | **Database** | PostgreSQL 15 + asyncpg | ACID compliance with async performance |
 | **ORM** | SQLAlchemy 2.0.41 | Type-safe database operations |
 | **Authentication** | JWT + bcrypt | Stateless secure authentication |
-| **Validation** | Pydantic 2.11.7 | Automatic request/response validation |
+| **Validation** | Pydantic 2.9.2 | Automatic request/response validation |
 | **Testing** | pytest 8.4.1 | Comprehensive test coverage |
 | **Deployment** | Docker + GitHub Actions | Containerized deployment with CI/CD |
 
