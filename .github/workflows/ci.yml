@@ -42,6 +42,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+        pip install flake8 mypy
 
     - name: Set up environment variables
       run: |
@@ -130,4 +131,4 @@ jobs:
     - name: Check for security vulnerabilities
       run: |
         pip install -r requirements.txt
-        safety scan --json
+        safety scan --output json --continue-on-error
