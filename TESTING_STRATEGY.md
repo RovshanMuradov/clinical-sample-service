@@ -1,363 +1,359 @@
-# Comprehensive Testing Strategy
+# Clinical Sample Service Testing Strategy
 
-## Current Testing Status
+## Current Test Coverage Analysis
 
-**Current Coverage:** 46.16% (Target: 70%+)  
-**Tests Implemented:** 41 unit tests  
-**Critical Security Coverage:** 95% ✅  
+**Current Coverage: 46.16%** (1352 statements, 698 missed)
 
-## Coverage Analysis
+### Existing Test Coverage
+- **Service Layer**: Well-tested (AuthService ~66%, SampleService ~94%)
+- **Repository Layer**: Partially tested (SampleRepository ~81%, UserRepository ~54%)
+- **Schemas**: Partially tested (Sample ~76%, Auth ~65%)
+- **Security Module**: Well-tested (~85%)
+- **Models**: Fully tested (100%)
 
-### ✅ Well Tested (High Coverage)
-- **Services Layer:** Sample service (94%), core business logic
-- **Models:** User (100%), Sample (100%) 
-- **Security:** Password hashing, JWT validation, data isolation
-- **Schemas:** Good validation coverage (65-87%)
+### Critical Gaps (0% Coverage)
+1. **API Layer** (deps.py, endpoints/*.py)
+2. **Main Application** (main.py)
+3. **Middleware** (logging_middleware.py, security_middleware.py)
+4. **Core Logging** (logging.py)
 
-### ❌ Missing Coverage (Critical Gaps)
+## Testing Strategy to Achieve 90%+ Coverage
 
-#### **Priority 1: API Layer (0% Coverage) - CRITICAL**
-- `app/api/deps.py` (0%) - Dependency injection, auth middleware
-- `app/api/v1/endpoints/auth.py` (0%) - Authentication endpoints  
-- `app/api/v1/endpoints/samples.py` (0%) - Sample CRUD endpoints
-- `app/main.py` (0%) - FastAPI application setup
+### Phase 1: API Layer Tests (Critical Priority)
 
-#### **Priority 2: Middleware (0% Coverage) - HIGH**
-- `app/middleware/logging_middleware.py` (0%) - Request logging
-- `app/middleware/security_middleware.py` (0%) - Security headers, rate limiting
-
-#### **Priority 3: Core Infrastructure - MEDIUM**
-- `app/core/logging.py` (0%) - Logging configuration
-- `app/core/exceptions.py` (59%) - Exception handling
-- `app/db/base.py` (42%) - Database connection
-
-#### **Priority 4: Repository Gaps - MEDIUM**
-- `app/repositories/user_repository.py` (54%) - User data access
-- `app/services/auth_service.py` (66%) - Auth business logic
-
----
-
-## Testing Implementation Plan
-
-### Phase 1: API Integration Tests (Priority 1)
-
-**Goal:** Cover critical API endpoints with integration tests  
-**Target Coverage Increase:** +25%
-
-#### 1.1 Authentication API Tests (`test_api_auth.py`)
+#### 1.1 Authentication Endpoints Tests (`tests/test_api/test_auth.py`)
 ```python
-# POST /api/v1/auth/register
-- test_register_valid_user()
-- test_register_duplicate_email_blocked()
-- test_register_invalid_password_format()
-- test_register_invalid_email_format()
-
-# POST /api/v1/auth/login  
-- test_login_valid_credentials()
-- test_login_invalid_credentials()
-- test_login_inactive_user_blocked()
-
-# POST /api/v1/auth/refresh
-- test_refresh_valid_token()
-- test_refresh_expired_token()
-- test_refresh_invalid_token()
+# Test coverage needed for app/api/v1/endpoints/auth.py (21 statements)
+- POST /auth/register
+  -  Valid registration
+  -  Duplicate email/username
+  -  Invalid password format
+  -  Invalid email format
+  -  Missing required fields
+  
+- POST /auth/login
+  -  Valid login
+  -  Invalid credentials
+  -  Inactive user
+  -  Missing fields
+  
+- POST /auth/refresh
+  -  Valid token refresh
+  -  Expired refresh token
+  -  Invalid refresh token
+  
+- GET /auth/me
+  -  Valid authenticated user
+  -  Invalid/expired token
+  -  No token provided
 ```
 
-#### 1.2 Samples API Tests (`test_api_samples.py`)
+#### 1.2 Sample Endpoints Tests (`tests/test_api/test_samples.py`)
 ```python
-# POST /api/v1/samples
-- test_create_sample_authenticated()
-- test_create_sample_unauthenticated_blocked()
-- test_create_sample_invalid_data()
-
-# GET /api/v1/samples
-- test_get_samples_with_auth()
-- test_get_samples_with_filters()
-- test_get_samples_pagination()
-- test_get_samples_unauthorized_blocked()
-
-# GET /api/v1/samples/{id}
-- test_get_sample_by_id_owner()
-- test_get_sample_by_id_unauthorized()
-- test_get_sample_not_found()
-
-# PUT /api/v1/samples/{id}
-- test_update_sample_owner()
-- test_update_sample_unauthorized()
-- test_update_sample_invalid_data()
-
-# DELETE /api/v1/samples/{id}
-- test_delete_sample_owner()
-- test_delete_sample_unauthorized()
-
-# GET /api/v1/samples/subject/{subject_id}
-- test_get_samples_by_subject()
-- test_get_samples_by_subject_unauthorized()
-
-# GET /api/v1/samples/stats/overview
-- test_get_statistics_user_isolated()
+# Test coverage needed for app/api/v1/endpoints/samples.py (40 statements)
+- POST /samples
+  -  Create sample with valid data
+  -  Business rule violations
+  -  Unauthenticated request
+  -  Validation errors
+  
+- GET /samples
+  -  List samples with pagination
+  -  Filter by type/status/date
+  -  Empty results
+  -  Invalid pagination params
+  
+- GET /samples/{id}
+  -  Get existing sample
+  -  Access denied (other user's sample)
+  -  Sample not found
+  -  Invalid UUID format
+  
+- PUT /samples/{id}
+  -  Update own sample
+  -  Authorization error
+  -  Validation errors
+  -  Not found
+  
+- DELETE /samples/{id}
+  -  Delete own sample
+  -  Authorization error
+  -  Not found
+  
+- GET /samples/statistics
+  -  Get user statistics
+  -  Unauthenticated request
+  
+- GET /samples/subjects/{subject_id}
+  -  Get samples by subject
+  -  No results
+  -  Invalid subject format
 ```
 
-#### 1.3 Dependencies Tests (`test_api_deps.py`)
+#### 1.3 Dependencies Tests (`tests/test_api/test_deps.py`)
 ```python
-- test_get_current_user_valid_token()
-- test_get_current_user_invalid_token()
-- test_get_current_user_expired_token()
-- test_get_db_session_creation()
+# Test coverage needed for app/api/deps.py (34 statements)
+- get_db dependency
+  -  Session creation/cleanup
+  -  Transaction rollback on error
+  
+- get_current_user dependency
+  -  Valid token extraction
+  -  Invalid token handling
+  -  User not found
+  -  Inactive user
+  
+- get_current_active_user dependency
+  -  Active user validation
+  -  Inactive user rejection
 ```
 
-#### 1.4 FastAPI Application Tests (`test_main.py`)
+### Phase 2: Application & Middleware Tests
+
+#### 2.1 Main Application Tests (`tests/test_main.py`)
 ```python
-- test_app_startup()
-- test_health_check_endpoint()
-- test_cors_configuration()
-- test_exception_handlers()
-- test_middleware_registration()
+# Test coverage needed for app/main.py (98 statements)
+- Application startup
+  -  FastAPI app initialization
+  -  CORS configuration
+  -  Middleware registration
+  -  Router inclusion
+  -  Exception handlers
+  
+- Health check endpoint
+  -  GET /health
+  -  GET /
+  
+- OpenAPI configuration
+  -  Custom OpenAPI schema
+  -  API documentation
 ```
 
-### Phase 2: Middleware Tests (Priority 2)
-
-**Goal:** Test security and logging middleware  
-**Target Coverage Increase:** +10%
-
-#### 2.1 Security Middleware Tests (`test_security_middleware.py`)
+#### 2.2 Logging Middleware Tests (`tests/test_middleware/test_logging.py`)
 ```python
-- test_security_headers_added()
-- test_rate_limiting_enforced()
-- test_suspicious_request_detection()
-- test_payload_size_validation()
-- test_user_agent_validation()
+# Test coverage needed for app/middleware/logging_middleware.py (89 statements)
+- Request logging
+  -  Correlation ID generation
+  -  Request details capture
+  -  Response logging
+  -  Error logging
+  -  Performance metrics
+  
+- Edge cases
+  -  Large request bodies
+  -  Binary content
+  -  Streaming responses
 ```
 
-#### 2.2 Logging Middleware Tests (`test_logging_middleware.py`)
+#### 2.3 Security Middleware Tests (`tests/test_middleware/test_security.py`)
 ```python
-- test_request_correlation_id_generation()
-- test_sensitive_data_filtering()
-- test_performance_logging()
-- test_error_logging_with_context()
+# Test coverage needed for app/middleware/security_middleware.py (141 statements)
+- Rate limiting
+  -  Request counting
+  -  Rate limit enforcement
+  -  IP-based tracking
+  -  Whitelist handling
+  
+- Security headers
+  -  XSS protection
+  -  Content type options
+  -  Frame options
+  -  CSP headers
+  
+- Attack detection
+  -  SQL injection patterns
+  -  XSS patterns
+  -  Path traversal
+  -  Command injection
+  
+- Request validation
+  -  Size limits
+  -  Suspicious patterns
+  -  Malformed requests
 ```
 
-### Phase 3: Core Infrastructure Tests (Priority 3)
+### Phase 3: Core Infrastructure Tests
 
-**Goal:** Test core application infrastructure  
-**Target Coverage Increase:** +8%
-
-#### 3.1 Exception Handling Tests (`test_exceptions.py`)
+#### 3.1 Logging Module Tests (`tests/test_core/test_logging.py`)
 ```python
-- test_custom_exception_handling()
-- test_validation_error_responses()
-- test_not_found_error_responses()
-- test_authentication_error_responses()
-- test_authorization_error_responses()
-- test_database_error_responses()
+# Test coverage needed for app/core/logging.py (117 statements)
+- Logger configuration
+  -  JSON formatter
+  -  Log levels
+  -  File rotation
+  -  Console output
+  
+- Correlation ID handling
+  -  ID generation
+  -  Context propagation
+  -  Async context
+  
+- Performance logging
+  -  Request timing
+  -  Database query logging
+  -  Error tracking
 ```
 
-#### 3.2 Logging Configuration Tests (`test_logging_config.py`)
+#### 3.2 Exception Handling Tests (`tests/test_core/test_exceptions.py`)
 ```python
-- test_logger_initialization()
-- test_log_level_configuration()
-- test_log_file_creation()
-- test_log_rotation()
-- test_structured_logging_format()
+# Additional coverage for app/core/exceptions.py (missing ~40%)
+- Custom exception behavior
+  -  HTTP response generation
+  -  Error detail formatting
+  -  Status code mapping
+  -  Logging integration
 ```
 
-#### 3.3 Database Connection Tests (`test_database.py`)
+### Phase 4: Repository & Schema Completion
+
+#### 4.1 Repository Tests (`tests/test_repositories/`)
 ```python
-- test_database_session_creation()
-- test_database_connection_pool()
-- test_database_transaction_handling()
-- test_database_error_handling()
+# Additional coverage needed:
+- UserRepository (~46% missing)
+  -  Error handling paths
+  -  Transaction rollback
+  -  Constraint violations
+  
+- SampleRepository (~19% missing)
+  -  Complex query scenarios
+  -  Edge cases in filtering
+  -  Database errors
 ```
 
-### Phase 4: Repository Coverage Completion (Priority 4)
-
-**Goal:** Complete repository layer testing  
-**Target Coverage Increase:** +5%
-
-#### 4.1 Enhanced User Repository Tests (`test_user_repository_extended.py`)
+#### 4.2 Schema Validation Tests (`tests/test_schemas/`)
 ```python
-- test_get_user_by_username()
-- test_update_user_password()
-- test_deactivate_user()
-- test_user_exists_check()
-- test_bulk_user_operations()
+# Additional coverage needed:
+- Auth schemas (~35% missing)
+  -  All validator edge cases
+  -  Error message formatting
+  
+- Sample schemas (~24% missing)
+  -  Complex validation scenarios
+  -  Cross-field validation
 ```
 
-#### 4.2 Enhanced Auth Service Tests (`test_auth_service_extended.py`)
+### Phase 5: Integration Tests
+
+#### 5.1 End-to-End Workflows (`tests/test_integration/`)
 ```python
-- test_token_refresh_flow()
-- test_password_reset_flow()
-- test_account_deactivation()
-- test_login_attempt_tracking()
+- Complete user journey
+  -  Register � Login � Create samples � Query � Update � Delete
+  -  Multi-user scenarios
+  -  Token refresh flow
+  -  Error recovery
+  
+- Database transactions
+  -  Rollback scenarios
+  -  Concurrent access
+  -  Data consistency
 ```
 
----
+## Implementation Plan
 
-## Implementation Strategy
+### Priority 1: API Layer (Days 1-3)
+- Create `tests/test_api/` directory
+- Implement all endpoint tests using FastAPI TestClient
+- Focus on authentication flow and sample CRUD
+- **Expected coverage gain: +15-20%**
 
-### Test File Organization
-```
-tests/
-├── test_api/                    # API integration tests
-│   ├── test_auth_endpoints.py
-│   ├── test_sample_endpoints.py
-│   ├── test_dependencies.py
-│   └── test_application.py
-├── test_middleware/             # Middleware tests
-│   ├── test_security_middleware.py
-│   └── test_logging_middleware.py
-├── test_core/                   # Core infrastructure tests
-│   ├── test_exceptions.py
-│   ├── test_logging_config.py
-│   └── test_database.py
-├── test_repositories/           # Enhanced repository tests
-│   └── test_user_repository_extended.py
-└── test_services/               # Current service tests (existing)
-    ├── test_auth_service_business_logic.py
-    ├── test_auth_service_security.py
-    ├── test_sample_service_authorization.py
-    ├── test_sample_service_crud.py
-    ├── test_sample_service_data_isolation.py
-    └── test_sample_service_edge_cases_validation.py
-```
+### Priority 2: Middleware & Security (Days 4-5)
+- Create `tests/test_middleware/` directory
+- Test security patterns and rate limiting
+- Validate logging behavior
+- **Expected coverage gain: +10-15%**
 
-### Testing Tools and Setup
+### Priority 3: Core Infrastructure (Days 6-7)
+- Complete logging and exception tests
+- Test database session management
+- **Expected coverage gain: +8-10%**
 
-#### Test Client Setup for API Tests
+### Priority 4: Complete Existing Gaps (Days 8-9)
+- Fill repository test gaps
+- Complete schema validation tests
+- **Expected coverage gain: +5-8%**
+
+### Priority 5: Integration Tests (Days 10)
+- End-to-end scenarios
+- Performance testing
+- **Expected coverage gain: +3-5%**
+
+## Test Implementation Guidelines
+
+### 1. Use Consistent Test Structure
 ```python
-# conftest.py additions
-from fastapi.testclient import TestClient
-from app.main import app
+class TestFeatureName:
+    """Test {feature} functionality."""
+    
+    async def test_happy_path(self):
+        """Test successful {operation}."""
+        # Arrange
+        # Act
+        # Assert
+    
+    async def test_validation_errors(self):
+        """Test {operation} with invalid data."""
+        # Test each validation rule
+    
+    async def test_authorization(self):
+        """Test {operation} authorization."""
+        # Test access control
+    
+    async def test_error_handling(self):
+        """Test {operation} error scenarios."""
+        # Test various failure modes
+```
 
+### 2. Use Fixtures Effectively
+```python
 @pytest.fixture
-def test_client():
-    """Create TestClient for API testing."""
-    return TestClient(app)
-
-@pytest.fixture
-def authenticated_headers(test_user1):
-    """Create authenticated headers for API testing."""
-    token = create_access_token(data={"sub": test_user1.email})
-    return {"Authorization": f"Bearer {token}"}
+async def authenticated_client(client: TestClient, test_user: User):
+    """Client with valid authentication token."""
+    token = create_access_token({"sub": str(test_user.id)})
+    client.headers["Authorization"] = f"Bearer {token}"
+    return client
 ```
 
-#### Mock External Dependencies
+### 3. Test Data Builders
 ```python
-# For database testing
-@pytest.fixture
-def mock_db_session():
-    """Mock database session for unit tests."""
-    pass
-
-# For middleware testing  
-@pytest.fixture
-def mock_request():
-    """Mock HTTP request for middleware tests."""
-    pass
+def build_sample_data(**overrides) -> dict:
+    """Build valid sample data with overrides."""
+    defaults = {
+        "sample_type": "blood",
+        "subject_id": "P001",
+        "collection_date": str(date.today()),
+        "storage_location": "freezer-1-rowA"
+    }
+    return {**defaults, **overrides}
 ```
 
----
-
-## Coverage Goals by Phase
-
-| Phase | Focus Area | Current Coverage | Target Coverage | Estimated Tests |
-|-------|------------|------------------|-----------------|-----------------|
-| 1 | API Endpoints | 0% | 80% | 25-30 tests |
-| 2 | Middleware | 0% | 75% | 10-12 tests |
-| 3 | Core Infrastructure | 30-60% | 80% | 15-20 tests |
-| 4 | Repository Completion | 54-81% | 85% | 8-10 tests |
-
-**Total Estimated Tests to Add:** 58-72 tests  
-**Projected Final Coverage:** 75-80%
-
----
-
-## Security Testing Priorities
-
-### Critical Security Tests (Already ✅ Covered)
-- Data isolation between users
-- JWT token validation
-- Password hashing and verification
-- Authorization checks
-
-### Additional Security Tests to Add
-- Rate limiting effectiveness
-- Input validation and sanitization
-- SQL injection prevention
-- Authentication bypass attempts
-- CORS configuration
-- Security headers validation
-
----
-
-## Performance and Load Testing (Optional)
-
-### Load Testing Targets
-- Authentication endpoints under load
-- Sample creation/retrieval performance
-- Database connection pooling efficiency
-- Middleware performance impact
-
-### Tools
-- pytest-benchmark for performance testing
-- locust for load testing
-
----
-
-## Test Execution Strategy
-
-### Continuous Integration
-```yaml
-# .github/workflows/test.yml
-name: Test Suite
-on: [push, pull_request]
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - run: pip install -r requirements/test.txt
-      - run: pytest --cov=app --cov-report=xml --cov-fail-under=70
-      - uses: codecov/codecov-action@v3
+### 4. Mock External Dependencies
+```python
+@patch("app.core.logging.logger")
+async def test_with_mocked_logger(mock_logger):
+    """Test with mocked logger to verify logging calls."""
+    # Test implementation
+    mock_logger.info.assert_called_with(...)
 ```
-
-### Local Development
-```bash
-# Run all tests with coverage
-make test-coverage
-
-# Run specific test categories
-pytest -m api      # API tests only
-pytest -m security # Security tests only
-pytest -m unit     # Unit tests only
-```
-
----
 
 ## Success Metrics
 
-### Quantitative Goals
-- **Coverage:** 70%+ overall, 90%+ for critical paths
-- **Test Count:** 100+ total tests
-- **Performance:** Test suite runs in <30 seconds
+1. **Coverage Target**: 90%+ overall, 95%+ for critical paths
+2. **Test Execution Time**: < 30 seconds for unit tests
+3. **Test Reliability**: 0% flaky tests
+4. **Documentation**: Every test has clear docstring
 
-### Qualitative Goals
-- All critical security scenarios covered
-- All API endpoints tested with auth flows
-- All middleware functionality verified
-- Exception handling thoroughly tested
-- Clear separation between unit/integration tests
+## Testing Best Practices
 
----
+1. **Isolation**: Each test should be independent
+2. **Clarity**: Test names should describe what they test
+3. **Speed**: Mock heavy operations (DB, external APIs)
+4. **Coverage**: Focus on behavior, not just lines
+5. **Maintenance**: Keep tests simple and focused
 
-## Timeline Estimate
+## Next Steps
 
-- **Phase 1:** 2-3 days (API integration tests)
-- **Phase 2:** 1 day (Middleware tests)  
-- **Phase 3:** 1-2 days (Core infrastructure)
-- **Phase 4:** 1 day (Repository completion)
-
-**Total Estimated Time:** 5-7 days for complete testing coverage
+1. Create test directory structure
+2. Set up additional test fixtures
+3. Implement Priority 1 tests (API layer)
+4. Run coverage reports after each phase
+5. Adjust strategy based on coverage gaps
