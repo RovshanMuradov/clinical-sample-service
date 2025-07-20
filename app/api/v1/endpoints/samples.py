@@ -1,7 +1,7 @@
 from typing import List, Optional
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Path
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.sample import SampleStatus, SampleType
@@ -661,7 +661,9 @@ async def delete_sample(
     },
 )
 async def get_samples_by_subject(
-    subject_id: str,
+    subject_id: str = Path(
+        ..., pattern=r"^[A-Za-z]\d{3,}$", description="Subject identifier"
+    ),
     db: AsyncSession = Depends(get_database),
     current_user: User = Depends(get_current_user),
 ):

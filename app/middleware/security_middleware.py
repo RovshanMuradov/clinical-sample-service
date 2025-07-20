@@ -3,7 +3,7 @@ import json
 import time
 from collections import defaultdict
 from datetime import datetime
-from typing import Awaitable, Callable, Dict
+from typing import Awaitable, Callable, Dict, Optional
 
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -22,11 +22,13 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         requests_per_minute: int = 60,
         burst_limit: int = 10,
         window_size: int = 60,
+        whitelist: Optional[set[str]] = None,
     ):
         super().__init__(app)
         self.requests_per_minute = requests_per_minute
         self.burst_limit = burst_limit
         self.window_size = window_size
+        self.whitelist = whitelist or set()
 
         # In-memory storage for rate limiting
         # In production, use Redis or similar
@@ -68,6 +70,9 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
     async def _check_rate_limit(self, client_ip: str, request: Request) -> None:
         """Check if request exceeds rate limits."""
         current_time = time.time()
+
+        if client_ip in self.whitelist:
+            return
 
         # Get requests for this client
         client_requests = self.requests[client_ip]
@@ -215,9 +220,9 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
         # HSTS (only for HTTPS)
         if self.enable_hsts:
-            response.headers[
-                "Strict-Transport-Security"
-            ] = "max-age=31536000; includeSubDomains; preload"
+            response.headers["Strict-Transport-Security"] = (
+                "max-age=31536000; includeSubDomains; preload"
+            )
 
 
 class RequestTimeoutMiddleware(BaseHTTPMiddleware):

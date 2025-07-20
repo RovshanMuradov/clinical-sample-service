@@ -6,114 +6,114 @@
 **Expected Coverage Gain: +15-20%**
 
 #### Authentication Endpoints (`tests/test_api/test_auth.py`)
-- [ ] Setup test file with TestClient fixture
-- [ ] POST /auth/register
-  - [ ] Valid registration success
-  - [ ] Duplicate email error (409)
-  - [ ] Duplicate username error (409)
-  - [ ] Invalid password format (422)
-  - [ ] Invalid email format (422)
-  - [ ] Missing required fields (422)
-- [ ] POST /auth/login
-  - [ ] Valid login with token response
-  - [ ] Invalid credentials (401)
-  - [ ] Inactive user rejection (401)
-  - [ ] Missing fields (422)
-- [ ] POST /auth/refresh
-  - [ ] Valid token refresh
-  - [ ] Expired refresh token (401)
-  - [ ] Invalid refresh token (401)
-  - [ ] Missing token (422)
-- [ ] GET /auth/me
-  - [ ] Valid authenticated user data
-  - [ ] Invalid/expired token (401)
-  - [ ] No authorization header (401)
+ - [x] Setup test file with TestClient fixture
+ - [x] POST /auth/register
+  - [x] Valid registration success
+  - [x] Duplicate email error (409)
+  - [x] Duplicate username error (409)
+  - [x] Invalid password format (422)
+  - [x] Invalid email format (422)
+  - [x] Missing required fields (422)
+ - [x] POST /auth/login
+  - [x] Valid login with token response
+  - [x] Invalid credentials (401)
+  - [x] Inactive user rejection (401)
+  - [x] Missing fields (422)
+ - [x] POST /auth/refresh
+  - [x] Valid token refresh
+  - [x] Expired refresh token (401)
+  - [x] Invalid refresh token (401)
+  - [x] Missing token (422)
+ - [x] GET /auth/me
+  - [x] Valid authenticated user data
+  - [x] Invalid/expired token (401)
+  - [x] No authorization header (401)
 
 #### Sample Endpoints (`tests/test_api/test_samples.py`)
-- [ ] Setup authenticated client fixture
-- [ ] POST /samples
-  - [ ] Create sample with valid data
-  - [ ] Subject ID validation (422)
-  - [ ] Collection date validation (422)
-  - [ ] Tissue storage rule (422)
-  - [ ] Unauthenticated request (401)
-- [ ] GET /samples
-  - [ ] List user's samples
-  - [ ] Pagination (skip/limit)
-  - [ ] Filter by sample_type
-  - [ ] Filter by status
-  - [ ] Filter by date range
-  - [ ] Empty results
-  - [ ] Invalid pagination params
-- [ ] GET /samples/{id}
-  - [ ] Get own sample
-  - [ ] Other user's sample (403)
-  - [ ] Sample not found (404)
-  - [ ] Invalid UUID format (422)
-- [ ] PUT /samples/{id}
-  - [ ] Update own sample
-  - [ ] Partial update
-  - [ ] Other user's sample (403)
-  - [ ] Validation errors (422)
-  - [ ] Not found (404)
-- [ ] DELETE /samples/{id}
-  - [ ] Delete own sample
-  - [ ] Other user's sample (403)
-  - [ ] Not found (404)
-- [ ] GET /samples/statistics
-  - [ ] Get user statistics
-  - [ ] Verify data isolation
-  - [ ] Unauthenticated (401)
-- [ ] GET /samples/subjects/{subject_id}
-  - [ ] Get samples by subject
-  - [ ] No results (empty list)
-  - [ ] Invalid subject format (422)
+- [x] Setup authenticated client fixture
+- [x] POST /samples
+  - [x] Create sample with valid data
+  - [x] Subject ID validation (422)
+  - [x] Collection date validation (422)
+  - [x] Tissue storage rule (422)
+  - [x] Unauthenticated request (401)
+- [x] GET /samples
+  - [x] List user's samples
+  - [x] Pagination (skip/limit)
+  - [x] Filter by sample_type
+  - [x] Filter by status
+  - [x] Filter by date range
+  - [x] Empty results
+  - [x] Invalid pagination params
+ - [x] GET /samples/{id}
+  - [x] Get own sample
+  - [x] Other user's sample (403)
+  - [x] Sample not found (404)
+  - [x] Invalid UUID format (422)
+ - [x] PUT /samples/{id}
+  - [x] Update own sample
+  - [x] Partial update
+  - [x] Other user's sample (403)
+  - [x] Validation errors (422)
+  - [x] Not found (404)
+ - [x] DELETE /samples/{id}
+  - [x] Delete own sample
+  - [x] Other user's sample (403)
+  - [x] Not found (404)
+ - [x] GET /samples/statistics
+  - [x] Get user statistics
+  - [x] Verify data isolation
+  - [x] Unauthenticated (401)
+ - [x] GET /samples/subjects/{subject_id}
+  - [x] Get samples by subject
+  - [x] No results (empty list)
+  - [x] Invalid subject format (422)
 
 #### Dependencies (`tests/test_api/test_deps.py`)
-- [ ] get_db dependency
-  - [ ] Session creation
-  - [ ] Session cleanup
-  - [ ] Rollback on exception
-- [ ] get_current_user dependency
-  - [ ] Valid token → user
-  - [ ] Invalid token (401)
-  - [ ] User not found (401)
-  - [ ] Inactive user (401)
-- [ ] get_current_active_user
-  - [ ] Active user pass-through
-  - [ ] Inactive user rejection
+- [x] get_db dependency
+  - [x] Session creation
+  - [x] Session cleanup
+  - [x] Rollback on exception
+- [x] get_current_user dependency
+  - [x] Valid token → user
+  - [x] Invalid token (401)
+  - [x] User not found (401)
+  - [x] Inactive user (401)
+- [x] get_current_active_user
+  - [x] Active user pass-through
+  - [x] Inactive user rejection
 
 ### 🟡 Priority 2: Middleware & Security (Days 4-5)
 **Expected Coverage Gain: +10-15%**
 
 #### Main Application (`tests/test_main.py`)
-- [ ] FastAPI app creation
-- [ ] CORS middleware configuration
-- [ ] Custom middleware registration
-- [ ] Router inclusion
-- [ ] Exception handler registration
-- [ ] GET / endpoint
-- [ ] GET /health endpoint
-- [ ] OpenAPI schema customization
+ - [x] FastAPI app creation
+ - [x] CORS middleware configuration
+ - [x] Custom middleware registration
+ - [x] Router inclusion
+ - [x] Exception handler registration
+ - [x] GET / endpoint
+ - [x] GET /health endpoint
+ - [x] OpenAPI schema customization
 
 #### Logging Middleware (`tests/test_middleware/test_logging.py`)
-- [ ] Correlation ID generation
-- [ ] Request logging
-  - [ ] Method, path, headers
-  - [ ] Body content (with size limit)
-  - [ ] Query parameters
-- [ ] Response logging
-  - [ ] Status code
-  - [ ] Response time
-  - [ ] Response size
-- [ ] Error logging
-  - [ ] 4xx errors
-  - [ ] 5xx errors
-  - [ ] Exception details
-- [ ] Edge cases
-  - [ ] Large request bodies
-  - [ ] Binary content
-  - [ ] Streaming responses
+- [x] Correlation ID generation
+- [x] Request logging
+  - [x] Method, path, headers
+  - [x] Body content (with size limit)
+  - [x] Query parameters
+- [x] Response logging
+  - [x] Status code
+  - [x] Response time
+  - [x] Response size
+- [x] Error logging
+  - [x] 4xx errors
+  - [x] 5xx errors
+  - [x] Exception details
+- [x] Edge cases
+  - [x] Large request bodies
+  - [x] Binary content
+  - [x] Streaming responses
 
 #### Security Middleware (`tests/test_middleware/test_security.py`)
 - [x] Rate limiting
@@ -224,15 +224,15 @@
 
 ### Fixtures (`tests/conftest.py` additions)
 - [x] `client` - TestClient instance
-- [x] `authenticated_client` - Client with auth token
-- [x] `db_session` - Test database session
-- [x] `test_data_builder` - Factory for test data
+ - [x] `authenticated_client` - Client with auth token
+ - [x] `db_session` - Test database session
+ - [x] `test_data_builder` - Factory for test data
 
 ### Helpers (`tests/helpers.py`)
-- [x] Token generation utilities
-- [x] Test data factories
-- [x] Response assertion helpers
-- [x] Database state validators
+ - [x] Token generation utilities
+ - [x] Test data factories
+ - [x] Response assertion helpers
+ - [x] Database state validators
 
 ## Coverage Checkpoints
 
