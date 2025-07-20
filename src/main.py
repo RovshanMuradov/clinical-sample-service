@@ -32,22 +32,10 @@ app = FastAPI(
     version="1.0.0",
     description="Clinical Sample Service API for Lambda deployment",
     docs_url="/docs",
-    redoc_url="/redoc",
+    redoc_url="/redoc", 
     openapi_url="/openapi.json",
     debug=False,  # Always False in Lambda
 )
-
-# Fix for Swagger UI in API Gateway environment
-@app.get("/docs", include_in_schema=False)
-def custom_swagger_ui_html():
-    from fastapi.openapi.docs import get_swagger_ui_html
-    return get_swagger_ui_html(
-        openapi_url="/Prod/openapi.json",
-        title=app.title + " - Swagger UI",
-        oauth2_redirect_url="/Prod/docs/oauth2-redirect",
-        swagger_js_url="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.9.0/swagger-ui-bundle.js",
-        swagger_css_url="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.9.0/swagger-ui.css",
-    )
 
 # Configure security scheme for Swagger UI
 security_scheme = HTTPBearer(
