@@ -8,8 +8,13 @@
 
 A secure, production-ready REST API for managing clinical samples (blood, saliva, tissue) in medical research environments with enterprise-grade authentication and comprehensive API documentation.
 
+## Live Demo
+
+**🚀 [clinical-api-demo](https://rovshanmuradov.github.io/clinical-api-demo/)** - Interactive demonstration with auto-redirect to live API documentation
+
 ## Table of Contents
 
+- [Live Demo](#live-demo)
 - [Features](#features)
 - [Technology Stack](#technology-stack)
 - [Getting Started](#getting-started)
@@ -53,7 +58,8 @@ A secure, production-ready REST API for managing clinical samples (blood, saliva
 | **Authentication** | JWT + bcrypt | Stateless secure authentication |
 | **Validation** | Pydantic 2.9.2 | Automatic request/response validation |
 | **Testing** | pytest 8.4.1 | Comprehensive test coverage |
-| **Deployment** | Docker + GitHub Actions | Containerized deployment with CI/CD |
+| **Deployment** | AWS SAM + GitHub Actions | Serverless deployment with CI/CD |
+| **Infrastructure** | AWS Lambda + API Gateway | Production serverless architecture |
 
 ## Getting Started
 
@@ -113,6 +119,12 @@ uvicorn app.main:app --reload --port 8000
 
 ## API Documentation
 
+### Live Production API
+- **Interactive API Explorer**: [clinical-api-demo](https://rovshanmuradov.github.io/clinical-api-demo/) (auto-redirects to live docs)
+- **Direct API Access**: https://7wi1s6opc8.execute-api.eu-north-1.amazonaws.com/Prod/docs
+- **OpenAPI Schema**: https://7wi1s6opc8.execute-api.eu-north-1.amazonaws.com/Prod/openapi.json
+
+### Local Development
 - **Interactive API Explorer**: http://localhost:8000/docs
 - **Alternative Documentation**: http://localhost:8000/redoc
 - **OpenAPI Schema**: http://localhost:8000/openapi.json
@@ -134,19 +146,43 @@ uvicorn app.main:app --reload --port 8000
 
 ### Quick API Test
 
+#### Production API (Live Demo)
 ```bash
+API_BASE="https://7wi1s6opc8.execute-api.eu-north-1.amazonaws.com/Prod"
+
 # 1. Register a new user
-curl -X POST "http://localhost:8000/api/v1/auth/register" \
+curl -X POST "${API_BASE}/api/v1/auth/register" \
   -H "Content-Type: application/json" \
-  -d '{"username": "researcher", "email": "researcher@test.com", "password": "SecurePass!123"}'
+  -d '{"email": "researcher@test.com", "password": "SecurePass!123"}'
 
 # 2. Login to get JWT token
-curl -X POST "http://localhost:8000/api/v1/auth/login" \
+curl -X POST "${API_BASE}/api/v1/auth/login" \
   -H "Content-Type: application/json" \
   -d '{"email": "researcher@test.com", "password": "SecurePass!123"}'
 
 # 3. Create a sample (use token from step 2)
-curl -X POST "http://localhost:8000/api/v1/samples/" \
+curl -X POST "${API_BASE}/api/v1/samples" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"sample_type": "blood", "subject_id": "P001", "collection_date": "2025-01-20T10:00:00Z", "storage_location": "freezer-1-rowA"}'
+```
+
+#### Local Development
+```bash
+API_BASE="http://localhost:8000"
+
+# 1. Register a new user
+curl -X POST "${API_BASE}/api/v1/auth/register" \
+  -H "Content-Type: application/json" \
+  -d '{"username": "researcher", "email": "researcher@test.com", "password": "SecurePass!123"}'
+
+# 2. Login to get JWT token
+curl -X POST "${API_BASE}/api/v1/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{"email": "researcher@test.com", "password": "SecurePass!123"}'
+
+# 3. Create a sample (use token from step 2)
+curl -X POST "${API_BASE}/api/v1/samples/" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"sample_type": "blood", "subject_id": "P001", "collection_date": "2025-01-20", "storage_location": "freezer-1-rowA"}'
@@ -254,6 +290,7 @@ pytest tests/test_samples.py -v
 
 ## Additional Docs
 
+- **[clinical-api-demo](https://rovshanmuradov.github.io/clinical-api-demo/)** - Interactive live demonstration with professional presentation
 - [Implementation Plan](docs/TODO.md) - Detailed project roadmap and progress tracking
 - [API Testing Report](docs/TESTING_API.md) - Live API test results and verification
 - [Unit Testing Report](docs/TESTING_REPORT.md) - Comprehensive test coverage analysis
