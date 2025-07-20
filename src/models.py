@@ -71,10 +71,10 @@ class Sample(Base):
     __tablename__ = "samples"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    sample_type = Column(SQLEnum(SampleType), nullable=False)
+    sample_type = Column(SQLEnum(SampleType, values_callable=lambda obj: [e.value for e in obj]), nullable=False)
     subject_id = Column(String(50), nullable=False, index=True)
     collection_date = Column(DateTime, nullable=False)
-    status = Column(SQLEnum(SampleStatus), nullable=False, default=SampleStatus.COLLECTED)
+    status = Column(SQLEnum(SampleStatus, values_callable=lambda obj: [e.value for e in obj]), nullable=False, default=SampleStatus.COLLECTED)
     storage_location = Column(String(100), nullable=True)
     notes = Column(Text, nullable=True)
     user_id = Column(UUID(as_uuid=True), nullable=False, index=True)
