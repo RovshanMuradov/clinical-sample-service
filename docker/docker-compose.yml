@@ -25,11 +25,11 @@ services:
   # Clinical Sample Service Application
   app:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: docker/Dockerfile
     container_name: clinical_sample_service
     env_file:
-      - .env
+      - ../.env
     environment:
       - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-clinical_user}:${POSTGRES_PASSWORD:-clinical_pass_2024}@db:5432/${POSTGRES_DB:-clinical_samples_db}
       - SECRET_KEY=${SECRET_KEY:-55e3be557dfe9c2a81a9e9c4bf78bdf15d66e95be1d6c9592848306ce91aac41}

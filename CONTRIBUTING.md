@@ -79,8 +79,7 @@ python3.11 -m venv venv
 source venv/bin/activate
 
 # Install development dependencies
-pip install -r requirements.txt
-pip install -r requirements.dev.txt
+pip install -r requirements/dev.txt
 
 # Set up pre-commit hooks
 pre-commit install

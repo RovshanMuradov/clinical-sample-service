@@ -19,7 +19,7 @@ RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Copy requirements first to leverage Docker layer caching
-COPY requirements.txt .
+COPY requirements/prod.txt requirements.txt
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
