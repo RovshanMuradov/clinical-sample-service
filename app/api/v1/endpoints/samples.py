@@ -282,12 +282,16 @@ async def get_samples(
         sample_type=sample_type,
         status=sample_status,
         subject_id=subject_id,
-        collection_date_from=datetime.strptime(collection_date_from, "%Y-%m-%d").date()
-        if collection_date_from
-        else None,
-        collection_date_to=datetime.strptime(collection_date_to, "%Y-%m-%d").date()
-        if collection_date_to
-        else None,
+        collection_date_from=(
+            datetime.strptime(collection_date_from, "%Y-%m-%d").date()
+            if collection_date_from
+            else None
+        ),
+        collection_date_to=(
+            datetime.strptime(collection_date_to, "%Y-%m-%d").date()
+            if collection_date_to
+            else None
+        ),
         storage_location=storage_location,
     )
 

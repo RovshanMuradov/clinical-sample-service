@@ -1,6 +1,7 @@
 """
 Test configuration and fixtures.
 """
+
 import os
 
 os.environ["DATABASE_URL"] = "postgresql+asyncpg://user:pass@localhost:5432/testdb"
@@ -229,7 +230,9 @@ async def app_with_overrides(async_session, monkeypatch):
 
     app.dependency_overrides[get_database] = _get_db_override
     # Disable rate limiting for tests
-    app.user_middleware = [m for m in app.user_middleware if m.cls is not RateLimitMiddleware]
+    app.user_middleware = [
+        m for m in app.user_middleware if m.cls is not RateLimitMiddleware
+    ]
     app.middleware_stack = app.build_middleware_stack()
     yield app
     app.dependency_overrides.clear()

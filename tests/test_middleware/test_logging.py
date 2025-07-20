@@ -22,6 +22,7 @@ class TestLoggingMiddleware:
         captured = {}
 
         from app.middleware import logging_middleware as lm
+
         orig_log_request = lm.log_request
         orig_log_response = lm.log_response
 
@@ -98,6 +99,7 @@ class TestLoggingMiddleware:
             async def generator():
                 for i in range(3):
                     yield f"{i}\n"
+
             return StreamingResponse(generator(), media_type="text/plain")
 
         app_with_overrides.add_api_route("/binary", echo_bytes, methods=["POST"])

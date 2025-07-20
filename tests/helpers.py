@@ -29,13 +29,20 @@ def build_user_data(**overrides):
         "email": f"user{overrides.get('email_suffix', '1')}@test.com",
         "password": "StrongPass1$",
     }
-    data.update({k: v for k, v in overrides.items() if k not in {'username_suffix', 'email_suffix'}})
+    data.update(
+        {
+            k: v
+            for k, v in overrides.items()
+            if k not in {"username_suffix", "email_suffix"}
+        }
+    )
     return data
 
 
 def build_sample_data(**overrides):
     """Return valid sample creation data with optional overrides."""
     from datetime import date
+
     data = {
         "sample_type": "blood",
         "subject_id": "P001",

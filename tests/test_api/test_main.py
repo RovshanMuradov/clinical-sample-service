@@ -27,6 +27,7 @@ class TestMainEndpoints:
         schema = response.json()
         assert "bearerAuth" in schema["components"]["securitySchemes"]
 
+
 class TestMainAppConfiguration:
     """Tests for FastAPI application configuration."""
 
@@ -39,14 +40,21 @@ class TestMainAppConfiguration:
     def test_cors_middleware_configuration(self, app_with_overrides):
         from fastapi.middleware.cors import CORSMiddleware
 
-        cors = next((m for m in app_with_overrides.user_middleware if m.cls is CORSMiddleware), None)
+        cors = next(
+            (m for m in app_with_overrides.user_middleware if m.cls is CORSMiddleware),
+            None,
+        )
         assert cors is not None
         opts = cors.kwargs
         assert opts["allow_credentials"] is True
         assert "X-Correlation-ID" in opts["expose_headers"]
 
     def test_custom_middlewares_registered(self, app_with_overrides):
-        from app.middleware import LoggingMiddleware, SecurityLoggingMiddleware, PerformanceLoggingMiddleware
+        from app.middleware import (
+            LoggingMiddleware,
+            SecurityLoggingMiddleware,
+            PerformanceLoggingMiddleware,
+        )
 
         classes = [m.cls for m in app_with_overrides.user_middleware]
         assert LoggingMiddleware in classes
@@ -56,10 +64,16 @@ class TestMainAppConfiguration:
     def test_router_included(self, app_with_overrides):
         paths = [route.path for route in app_with_overrides.router.routes]
         assert "/api/v1/auth/login" in paths
-        assert "/api/v1/samples/" in paths or any(p.startswith("/api/v1/samples") for p in paths)
+        assert "/api/v1/samples/" in paths or any(
+            p.startswith("/api/v1/samples") for p in paths
+        )
 
     def test_exception_handlers_registered(self, app_with_overrides):
-        from app.core.exceptions import NotFoundError, ValidationError, AuthenticationError
+        from app.core.exceptions import (
+            NotFoundError,
+            ValidationError,
+            AuthenticationError,
+        )
 
         handlers = app_with_overrides.exception_handlers
         assert NotFoundError in handlers

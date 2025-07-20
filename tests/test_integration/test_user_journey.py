@@ -12,7 +12,10 @@ async def test_end_to_end_flow(client, test_user2):
     }
     resp = await client.post("/api/v1/auth/register", json=reg_data)
     assert resp.status_code == 200
-    login_resp = await client.post("/api/v1/auth/login", json={"email": reg_data["email"], "password": reg_data["password"]})
+    login_resp = await client.post(
+        "/api/v1/auth/login",
+        json={"email": reg_data["email"], "password": reg_data["password"]},
+    )
     assert login_resp.status_code == 200
     token = login_resp.json()["access_token"]
     headers = {"Authorization": f"Bearer {token}"}
@@ -24,16 +27,22 @@ async def test_end_to_end_flow(client, test_user2):
     sample_id = resp.json()["id"]
 
     # query with filters
-    list_resp = await client.get("/api/v1/samples/", headers=headers, params={"sample_type": "blood"})
+    list_resp = await client.get(
+        "/api/v1/samples/", headers=headers, params={"sample_type": "blood"}
+    )
     assert list_resp.status_code == 200
     assert list_resp.json()["total"] >= 1
 
     # update
-    upd_resp = await client.put(f"/api/v1/samples/{sample_id}", json={"status": "processing"}, headers=headers)
+    upd_resp = await client.put(
+        f"/api/v1/samples/{sample_id}", json={"status": "processing"}, headers=headers
+    )
     assert upd_resp.status_code == 200
 
     # other user cannot delete
-    resp = await client.delete(f"/api/v1/samples/{sample_id}", headers=token_headers_for_user(test_user2))
+    resp = await client.delete(
+        f"/api/v1/samples/{sample_id}", headers=token_headers_for_user(test_user2)
+    )
     assert resp.status_code == 403
 
     # delete sample

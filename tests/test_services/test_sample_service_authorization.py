@@ -11,6 +11,7 @@ Tests verify:
 3. Users cannot view samples belonging to other users by ID
 4. Sample creation correctly assigns the authenticated user
 """
+
 from datetime import date
 
 import pytest

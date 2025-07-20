@@ -36,7 +36,9 @@ def test_setup_logging_structured(tmp_path, monkeypatch):
     assert root.level == logging.DEBUG
     assert any(isinstance(h, logging.StreamHandler) for h in root.handlers)
     assert any(isinstance(h, logging.FileHandler) for h in root.handlers)
-    assert any(isinstance(h.formatter, log_mod.StructuredFormatter) for h in root.handlers)
+    assert any(
+        isinstance(h.formatter, log_mod.StructuredFormatter) for h in root.handlers
+    )
     root.info("hello")
     assert log_file.exists()
 
@@ -76,7 +78,11 @@ def test_log_error(caplog):
 
 
 def test_log_request_and_response(caplog):
-    headers = {"Authorization": "secret", "User-Agent": "tester", "x-forwarded-for": "1.1.1.1"}
+    headers = {
+        "Authorization": "secret",
+        "User-Agent": "tester",
+        "x-forwarded-for": "1.1.1.1",
+    }
     with caplog.at_level(logging.INFO):
         log_mod.log_request("POST", "/unit", headers, body={"password": "x", "a": 1})
         log_mod.log_response(200, 0.123, 10)

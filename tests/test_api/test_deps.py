@@ -12,26 +12,30 @@ from app.core.exceptions import AuthenticationError, ValidationError
 class TestGetDb:
     @pytest.mark.asyncio
     async def test_session_lifecycle(self, async_engine, monkeypatch):
-        sessionmaker = async_sessionmaker(bind=async_engine, class_=AsyncSession, expire_on_commit=False)
-        monkeypatch.setattr('app.db.base.AsyncSessionLocal', sessionmaker)
+        sessionmaker = async_sessionmaker(
+            bind=async_engine, class_=AsyncSession, expire_on_commit=False
+        )
+        monkeypatch.setattr("app.db.base.AsyncSessionLocal", sessionmaker)
         gen = get_db()
         session = await gen.__anext__()
         assert isinstance(session, AsyncSession)
         close_mock = AsyncMock()
-        monkeypatch.setattr(session, 'close', close_mock)
+        monkeypatch.setattr(session, "close", close_mock)
         await gen.aclose()
         assert close_mock.called
 
     @pytest.mark.asyncio
     async def test_rollback_on_exception(self, async_engine, monkeypatch):
-        sessionmaker = async_sessionmaker(bind=async_engine, class_=AsyncSession, expire_on_commit=False)
-        monkeypatch.setattr('app.db.base.AsyncSessionLocal', sessionmaker)
+        sessionmaker = async_sessionmaker(
+            bind=async_engine, class_=AsyncSession, expire_on_commit=False
+        )
+        monkeypatch.setattr("app.db.base.AsyncSessionLocal", sessionmaker)
         gen = get_db()
         session = await gen.__anext__()
         rollback_mock = AsyncMock()
         close_mock = AsyncMock()
-        monkeypatch.setattr(session, 'rollback', rollback_mock)
-        monkeypatch.setattr(session, 'close', close_mock)
+        monkeypatch.setattr(session, "rollback", rollback_mock)
+        monkeypatch.setattr(session, "close", close_mock)
         with pytest.raises(RuntimeError):
             await gen.athrow(RuntimeError("boom"))
         rollback_mock.assert_called_once()
@@ -43,8 +47,11 @@ class TestGetCurrentUser:
     async def test_valid_token_returns_user(self, db_session, test_user1, monkeypatch):
         async def mock_get_current_user_by_token(self, token):
             return test_user1
-        monkeypatch.setattr(AuthService, 'get_current_user_by_token', mock_get_current_user_by_token)
-        creds = HTTPAuthorizationCredentials(scheme='Bearer', credentials='token')
+
+        monkeypatch.setattr(
+            AuthService, "get_current_user_by_token", mock_get_current_user_by_token
+        )
+        creds = HTTPAuthorizationCredentials(scheme="Bearer", credentials="token")
         user = await get_current_user(creds, db_session)
         assert user.id == test_user1.id
 
@@ -52,8 +59,11 @@ class TestGetCurrentUser:
     async def test_invalid_token_raises(self, db_session, monkeypatch):
         async def mock_get_current_user_by_token(self, token):
             return None
-        monkeypatch.setattr(AuthService, 'get_current_user_by_token', mock_get_current_user_by_token)
-        creds = HTTPAuthorizationCredentials(scheme='Bearer', credentials='bad')
+
+        monkeypatch.setattr(
+            AuthService, "get_current_user_by_token", mock_get_current_user_by_token
+        )
+        creds = HTTPAuthorizationCredentials(scheme="Bearer", credentials="bad")
         with pytest.raises(AuthenticationError):
             await get_current_user(creds, db_session)
 
@@ -61,8 +71,11 @@ class TestGetCurrentUser:
     async def test_user_not_found(self, db_session, monkeypatch):
         async def mock_get_current_user_by_token(self, token):
             return None
-        monkeypatch.setattr(AuthService, 'get_current_user_by_token', mock_get_current_user_by_token)
-        creds = HTTPAuthorizationCredentials(scheme='Bearer', credentials='valid')
+
+        monkeypatch.setattr(
+            AuthService, "get_current_user_by_token", mock_get_current_user_by_token
+        )
+        creds = HTTPAuthorizationCredentials(scheme="Bearer", credentials="valid")
         with pytest.raises(AuthenticationError):
             await get_current_user(creds, db_session)
 
@@ -70,8 +83,11 @@ class TestGetCurrentUser:
     async def test_inactive_user(self, db_session, inactive_user, monkeypatch):
         async def mock_get_current_user_by_token(self, token):
             return None
-        monkeypatch.setattr(AuthService, 'get_current_user_by_token', mock_get_current_user_by_token)
-        creds = HTTPAuthorizationCredentials(scheme='Bearer', credentials='token')
+
+        monkeypatch.setattr(
+            AuthService, "get_current_user_by_token", mock_get_current_user_by_token
+        )
+        creds = HTTPAuthorizationCredentials(scheme="Bearer", credentials="token")
         with pytest.raises(AuthenticationError):
             await get_current_user(creds, db_session)
 

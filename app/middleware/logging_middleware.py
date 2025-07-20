@@ -214,9 +214,9 @@ class SecurityLoggingMiddleware(BaseHTTPMiddleware):
                         "url": str(request.url),
                         "method": request.method,
                         "user_agent": request.headers.get("user-agent", "unknown"),
-                        "remote_addr": request.client.host
-                        if request.client
-                        else "unknown",
+                        "remote_addr": (
+                            request.client.host if request.client else "unknown"
+                        ),
                     },
                 )
                 break
@@ -246,9 +246,9 @@ class SecurityLoggingMiddleware(BaseHTTPMiddleware):
                         "user_agent": user_agent,
                         "url": str(request.url),
                         "method": request.method,
-                        "remote_addr": request.client.host
-                        if request.client
-                        else "unknown",
+                        "remote_addr": (
+                            request.client.host if request.client else "unknown"
+                        ),
                     },
                 )
                 break
