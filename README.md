@@ -121,7 +121,8 @@ uvicorn app.main:app --reload --port 8000
 
 ### Live Production API
 - **Interactive API Explorer**: [clinical-api-demo](https://rovshanmuradov.github.io/clinical-api-demo/) (auto-redirects to live docs)
-- **Direct API Access**: https://7wi1s6opc8.execute-api.eu-north-1.amazonaws.com/Prod/docs
+- **Swagger UI Documentation**: https://7wi1s6opc8.execute-api.eu-north-1.amazonaws.com/Prod/docs
+- **ReDoc Documentation**: https://7wi1s6opc8.execute-api.eu-north-1.amazonaws.com/Prod/redoc
 - **OpenAPI Schema**: https://7wi1s6opc8.execute-api.eu-north-1.amazonaws.com/Prod/openapi.json
 
 ### Local Development
