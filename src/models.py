@@ -21,11 +21,15 @@ from sqlalchemy.orm import sessionmaker
 
 from config import settings
 
-# Create database engine
+# Convert asyncpg URL to psycopg2 URL for Lambda
+database_url = settings.database_url.replace("postgresql+asyncpg://", "postgresql://")
+
+# Create database engine (synchronous for Lambda)
 engine = create_engine(
-    settings.database_url,
+    database_url,
     pool_pre_ping=True,
     pool_recycle=300,
+    echo=False,
 )
 
 # Create session factory

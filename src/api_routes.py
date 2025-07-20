@@ -106,7 +106,7 @@ def get_current_user(
 
 # Auth routes
 @api_router.post("/auth/register", response_model=Token)
-async def register(user_data: UserCreate, db: Session = Depends(get_db)):
+def register(user_data: UserCreate, db: Session = Depends(get_db)):
     """Register a new user."""
     # Check if user exists
     existing_user = db.query(User).filter(User.email == user_data.email).first()
@@ -129,7 +129,7 @@ async def register(user_data: UserCreate, db: Session = Depends(get_db)):
     return {"access_token": access_token, "token_type": "bearer"}
 
 @api_router.post("/auth/login", response_model=Token)
-async def login(user_data: UserLogin, db: Session = Depends(get_db)):
+def login(user_data: UserLogin, db: Session = Depends(get_db)):
     """Login user."""
     user = db.query(User).filter(User.email == user_data.email).first()
     if not user or not verify_password(user_data.password, user.hashed_password):
@@ -140,7 +140,7 @@ async def login(user_data: UserLogin, db: Session = Depends(get_db)):
 
 # Sample routes
 @api_router.post("/samples", response_model=SampleResponse)
-async def create_sample(
+def create_sample(
     sample_data: SampleCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
@@ -161,7 +161,7 @@ async def create_sample(
     return sample
 
 @api_router.get("/samples", response_model=List[SampleResponse])
-async def list_samples(
+def list_samples(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
     sample_type: Optional[SampleType] = None,
@@ -181,7 +181,7 @@ async def list_samples(
     return query.all()
 
 @api_router.get("/samples/{sample_id}", response_model=SampleResponse)
-async def get_sample(
+def get_sample(
     sample_id: UUID,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
@@ -198,7 +198,7 @@ async def get_sample(
     return sample
 
 @api_router.put("/samples/{sample_id}", response_model=SampleResponse)
-async def update_sample(
+def update_sample(
     sample_id: UUID,
     sample_data: SampleCreate,
     db: Session = Depends(get_db),
@@ -227,7 +227,7 @@ async def update_sample(
     return sample
 
 @api_router.delete("/samples/{sample_id}")
-async def delete_sample(
+def delete_sample(
     sample_id: UUID,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)

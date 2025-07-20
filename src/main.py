@@ -54,7 +54,7 @@ app.add_middleware(
 
 # Custom exception handlers
 @app.exception_handler(NotFoundError)
-async def not_found_handler(request: Request, exc: NotFoundError):
+def not_found_handler(request: Request, exc: NotFoundError):
     return JSONResponse(
         status_code=exc.status_code,
         content={
@@ -67,7 +67,7 @@ async def not_found_handler(request: Request, exc: NotFoundError):
     )
 
 @app.exception_handler(ValidationError)
-async def validation_error_handler(request: Request, exc: ValidationError):
+def validation_error_handler(request: Request, exc: ValidationError):
     return JSONResponse(
         status_code=exc.status_code,
         content={
@@ -80,7 +80,7 @@ async def validation_error_handler(request: Request, exc: ValidationError):
     )
 
 @app.exception_handler(AuthenticationError)
-async def authentication_error_handler(request: Request, exc: AuthenticationError):
+def authentication_error_handler(request: Request, exc: AuthenticationError):
     return JSONResponse(
         status_code=exc.status_code,
         content={
@@ -93,7 +93,7 @@ async def authentication_error_handler(request: Request, exc: AuthenticationErro
     )
 
 @app.exception_handler(AuthorizationError)
-async def authorization_error_handler(request: Request, exc: AuthorizationError):
+def authorization_error_handler(request: Request, exc: AuthorizationError):
     return JSONResponse(
         status_code=exc.status_code,
         content={
@@ -106,7 +106,7 @@ async def authorization_error_handler(request: Request, exc: AuthorizationError)
     )
 
 @app.exception_handler(ConflictError)
-async def conflict_error_handler(request: Request, exc: ConflictError):
+def conflict_error_handler(request: Request, exc: ConflictError):
     return JSONResponse(
         status_code=exc.status_code,
         content={
@@ -119,7 +119,7 @@ async def conflict_error_handler(request: Request, exc: ConflictError):
     )
 
 @app.exception_handler(DatabaseError)
-async def database_error_handler(request: Request, exc: DatabaseError):
+def database_error_handler(request: Request, exc: DatabaseError):
     return JSONResponse(
         status_code=exc.status_code,
         content={
@@ -132,7 +132,7 @@ async def database_error_handler(request: Request, exc: DatabaseError):
     )
 
 @app.exception_handler(BaseAPIException)
-async def base_api_exception_handler(request: Request, exc: BaseAPIException):
+def base_api_exception_handler(request: Request, exc: BaseAPIException):
     return JSONResponse(
         status_code=exc.status_code,
         content={
@@ -146,7 +146,7 @@ async def base_api_exception_handler(request: Request, exc: BaseAPIException):
 
 # Global exception handler
 @app.exception_handler(Exception)
-async def global_exception_handler(request: Request, exc: Exception):
+def global_exception_handler(request: Request, exc: Exception):
     return JSONResponse(
         status_code=500,
         content={
@@ -163,7 +163,7 @@ app.include_router(api_router, prefix="/api/v1")
 
 # Health check endpoint
 @app.get("/health", tags=["Health"])
-async def health_check():
+def health_check():
     """Health check endpoint for Lambda."""
     return {
         "status": "healthy",
@@ -175,7 +175,7 @@ async def health_check():
 
 # Root endpoint
 @app.get("/", tags=["Root"])
-async def root():
+def root():
     """Root endpoint."""
     return {
         "message": "Clinical Sample Service API",
