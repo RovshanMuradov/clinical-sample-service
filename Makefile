@@ -24,12 +24,12 @@ setup: ## Setup virtual environment and install dependencies
 	python3.11 -m venv venv
 	@echo "$(GREEN)Installing dependencies...$(RESET)"
 	./venv/bin/pip install --upgrade pip
-	./venv/bin/pip install -r requirements.txt
+	./venv/bin/pip install -r requirements/dev.txt
 	@echo "$(GREEN)Setup complete! Run 'source venv/bin/activate' to activate the environment$(RESET)"
 
 install: ## Install/update dependencies
 	@echo "$(GREEN)Installing dependencies...$(RESET)"
-	./venv/bin/pip install -r requirements.txt
+	./venv/bin/pip install -r requirements/dev.txt
 
 ## Development
 dev: ## Run development server locally
@@ -43,40 +43,40 @@ dev-logs: ## Show development server logs
 ## Docker Commands
 docker-build: ## Build Docker images
 	@echo "$(GREEN)Building Docker images...$(RESET)"
-	docker-compose build
+	cd docker && docker-compose build
 
 docker-up: ## Start all services with Docker
 	@echo "$(GREEN)Starting Docker services...$(RESET)"
-	docker-compose up -d
+	cd docker && docker-compose up -d
 	@echo "$(GREEN)Services started! Check status with 'make docker-status'$(RESET)"
 
 docker-up-logs: ## Start all services with Docker and show logs
 	@echo "$(GREEN)Starting Docker services with logs...$(RESET)"
-	docker-compose up
+	cd docker && docker-compose up
 
 docker-down: ## Stop all Docker services
 	@echo "$(GREEN)Stopping Docker services...$(RESET)"
-	docker-compose down
+	cd docker && docker-compose down
 
 docker-restart: ## Restart Docker services
 	@echo "$(GREEN)Restarting Docker services...$(RESET)"
-	docker-compose restart
+	cd docker && docker-compose restart
 
 docker-logs: ## Show Docker logs
 	@echo "$(GREEN)Showing Docker logs...$(RESET)"
-	docker-compose logs -f
+	cd docker && docker-compose logs -f
 
 docker-status: ## Show Docker services status
 	@echo "$(GREEN)Docker services status:$(RESET)"
-	docker-compose ps
+	cd docker && docker-compose ps
 
 docker-shell: ## Access application container shell
 	@echo "$(GREEN)Accessing application container...$(RESET)"
-	docker-compose exec app bash
+	cd docker && docker-compose exec app bash
 
 docker-db-shell: ## Access database container shell
 	@echo "$(GREEN)Accessing database container...$(RESET)"
-	docker-compose exec db psql -U clinical_user -d clinical_samples_db
+	cd docker && docker-compose exec db psql -U clinical_user -d clinical_samples_db
 
 ## Database Commands
 migrate-create: ## Create new migration (Usage: make migrate-create MESSAGE="description")
@@ -149,7 +149,7 @@ clean: ## Clean up temporary files and caches
 
 clean-docker: ## Clean up Docker resources
 	@echo "$(GREEN)Cleaning Docker resources...$(RESET)"
-	docker-compose down -v
+	cd docker && docker-compose down -v
 	docker system prune -f
 
 ## Quick Start Commands
