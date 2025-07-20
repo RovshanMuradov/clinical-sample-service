@@ -1,0 +1,78 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Clinical Sample API (FastAPI) on Lambda + RDS
+
+Globals:
+  Function:
+    Timeout: 30
+    Runtime: python3.11
+    MemorySize: 512
+
+Parameters:
+  DBEndpoint:
+    Type: String
+    Description: RDS PostgreSQL endpoint (without port)
+  DBUser:
+    Type: String
+    Description: Database username
+    Default: postgres
+  DBPassword:
+    Type: String
+    Description: Database password
+    NoEcho: true
+  DBName:
+    Type: String
+    Description: Database name
+    Default: clinical_samples
+  JWTSecret:
+    Type: String
+    Description: JWT secret key for token signing
+    NoEcho: true
+  LambdaSecurityGroupId:
+    Type: String
+    Description: Security Group ID for Lambda function
+    Default: sg-05afe40afd6c48322
+
+Resources:
+  ClinicalApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: app.lambda_handler
+      CodeUri: ./src
+      Environment:
+        Variables:
+          DATABASE_URL: !Sub postgresql+asyncpg://${DBUser}:${DBPassword}@${DBEndpoint}/${DBName}
+          JWT_SECRET: !Ref JWTSecret
+          JWT_ALGORITHM: HS256
+          ACCESS_TOKEN_EXPIRE_MINUTES: 30
+          LOG_LEVEL: INFO
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref LambdaSecurityGroupId
+        SubnetIds:
+          - subnet-0c4620dd52587e412  # eu-north-1c
+          - subnet-09a7879de3b5d8f79  # eu-north-1a
+      Events:
+        ApiGateway:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+        HealthCheck:
+          Type: Api
+          Properties:
+            Path: /health
+            Method: GET
+
+Outputs:
+  ApiUrl:
+    Description: "API Gateway endpoint URL for Clinical Sample API"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+  
+  FunctionName:
+    Description: "Lambda Function Name"
+    Value: !Ref ClinicalApiFunction
+    
+  FunctionArn:
+    Description: "Lambda Function ARN"
+    Value: !GetAtt ClinicalApiFunction.Arn

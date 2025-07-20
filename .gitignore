@@ -92,3 +92,15 @@ Workflow.md
 CLAUDE.md
 .claude/settings.local.json
 TESTING.md
+
+# SAM
+.aws-sam/
+samconfig.toml
+
+# Sensitive files with secrets
+GITHUB_SECRETS.md
+DEPLOYMENT_SUCCESS.md
+
+# Old Chalice project (deprecated)
+clinical-sample-api/
+chalice-venv/
