@@ -168,9 +168,10 @@ def health_check():
     return {
         "status": "healthy",
         "service": "Clinical Sample Service",
-        "version": "1.0.0",
+        "version": "1.0.1",
         "timestamp": time.time(),
         "environment": "lambda",
+        "database": "postgresql-ready",
     }
 
 # Root endpoint
