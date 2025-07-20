@@ -31,6 +31,7 @@ app = FastAPI(
     title="Clinical Sample Service API",
     version="1.0.0",
     description="Clinical Sample Service API for Lambda deployment",
+    root_path="/Prod",  # Fixes Swagger UI paths for API Gateway
     docs_url="/docs",
     redoc_url="/redoc", 
     openapi_url="/openapi.json",
