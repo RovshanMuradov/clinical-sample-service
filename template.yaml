@@ -34,6 +34,28 @@ Parameters:
     Default: sg-05afe40afd6c48322
 
 Resources:
+  # API Gateway with throttling configuration
+  ServerlessRestApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      ThrottleConfig:
+        BurstLimit: 200      # Max concurrent requests
+        RateLimit: 100       # Requests per second
+      MethodSettings:
+        - ResourcePath: "/*"
+          HttpMethod: "*"
+          ThrottlingBurstLimit: 200
+          ThrottlingRateLimit: 100
+        - ResourcePath: "/api/v1/auth/register"
+          HttpMethod: "POST"
+          ThrottlingBurstLimit: 20   # Stricter limits for registration
+          ThrottlingRateLimit: 5     # 5 registrations per second max
+        - ResourcePath: "/api/v1/auth/login"
+          HttpMethod: "POST"
+          ThrottlingBurstLimit: 50   # Moderate limits for login
+          ThrottlingRateLimit: 10    # 10 logins per second max
+
   ClinicalApiFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -56,16 +78,19 @@ Resources:
         ApiGateway:
           Type: Api
           Properties:
+            RestApiId: !Ref ServerlessRestApi
             Path: /{proxy+}
             Method: ANY
         RootEndpoint:
           Type: Api
           Properties:
+            RestApiId: !Ref ServerlessRestApi
             Path: /
             Method: GET
         HealthCheck:
           Type: Api
           Properties:
+            RestApiId: !Ref ServerlessRestApi
             Path: /health
             Method: GET
 
