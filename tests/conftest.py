@@ -157,6 +157,24 @@ async def test_samples_user1(
 
 
 @pytest_asyncio.fixture
+async def async_client(async_session: AsyncSession):
+    """Async HTTP client with FastAPI app and test DB."""
+    from httpx import AsyncClient
+    from app.main import app
+    from app.api.deps import get_database
+
+    async def _get_db_override():
+        yield async_session
+
+    app.dependency_overrides[get_database] = _get_db_override
+
+    async with AsyncClient(app=app, base_url="http://test") as client:
+        yield client
+
+    app.dependency_overrides.clear()
+
+
+@pytest_asyncio.fixture
 async def test_samples_user2(
     sample_repository: SampleRepository, test_user2: User
 ) -> list[Sample]:
