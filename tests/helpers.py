@@ -63,7 +63,8 @@ def assert_error_response(resp, status_code: int):
 
 async def count_users(session):
     """Return number of users in the database."""
-    from sqlalchemy import select, func
+    from sqlalchemy import func, select
+
     from app.models.user import User
 
     result = await session.execute(select(func.count(User.id)))

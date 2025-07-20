@@ -221,9 +221,9 @@ async def app_with_overrides(async_session, monkeypatch):
     monkeypatch.setenv("DATABASE_URL", SQLALCHEMY_TEST_DATABASE_URL)
     monkeypatch.setenv("RATE_LIMIT_BURST", "1000")
     monkeypatch.setenv("RATE_LIMIT_PER_MINUTE", "1000")
+    from app.api.deps import get_database
     from app.main import app
     from app.middleware.security_middleware import RateLimitMiddleware
-    from app.api.deps import get_database
 
     async def _get_db_override():
         yield async_session
@@ -241,7 +241,7 @@ async def app_with_overrides(async_session, monkeypatch):
 @pytest_asyncio.fixture
 async def client(app_with_overrides):
     """HTTP client for API tests."""
-    from httpx import AsyncClient, ASGITransport
+    from httpx import ASGITransport, AsyncClient
 
     transport = ASGITransport(app_with_overrides)
     async with AsyncClient(transport=transport, base_url="http://testserver") as ac:

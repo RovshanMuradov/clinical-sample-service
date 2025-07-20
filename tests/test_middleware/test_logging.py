@@ -1,6 +1,7 @@
 import json
+
 import pytest
-from fastapi import Body, Response, Request
+from fastapi import Body, Request, Response
 from fastapi.responses import StreamingResponse
 
 
@@ -80,7 +81,7 @@ class TestLoggingMiddleware:
             "app.middleware.logging_middleware.log_error", fake_log_error
         )
 
-        from httpx import AsyncClient, ASGITransport
+        from httpx import ASGITransport, AsyncClient
 
         transport = ASGITransport(app_with_overrides, raise_app_exceptions=False)
         async with AsyncClient(transport=transport, base_url="http://testserver") as ac:
@@ -120,7 +121,7 @@ class TestLoggingMiddleware:
             "app.middleware.logging_middleware.log_response", fake_log_response
         )
 
-        from httpx import AsyncClient, ASGITransport
+        from httpx import ASGITransport, AsyncClient
 
         transport = ASGITransport(app_with_overrides, raise_app_exceptions=False)
         async with AsyncClient(transport=transport, base_url="http://testserver") as ac:

@@ -1,12 +1,13 @@
-import pytest
 from unittest.mock import AsyncMock
-from fastapi.security import HTTPAuthorizationCredentials
-from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
 
-from app.db.base import get_db
-from app.api.deps import get_current_user, get_current_active_user
-from app.services.auth_service import AuthService
+import pytest
+from fastapi.security import HTTPAuthorizationCredentials
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+
+from app.api.deps import get_current_active_user, get_current_user
 from app.core.exceptions import AuthenticationError, ValidationError
+from app.db.base import get_db
+from app.services.auth_service import AuthService
 
 
 class TestGetDb:

@@ -52,8 +52,8 @@ class TestMainAppConfiguration:
     def test_custom_middlewares_registered(self, app_with_overrides):
         from app.middleware import (
             LoggingMiddleware,
-            SecurityLoggingMiddleware,
             PerformanceLoggingMiddleware,
+            SecurityLoggingMiddleware,
         )
 
         classes = [m.cls for m in app_with_overrides.user_middleware]
@@ -70,9 +70,9 @@ class TestMainAppConfiguration:
 
     def test_exception_handlers_registered(self, app_with_overrides):
         from app.core.exceptions import (
+            AuthenticationError,
             NotFoundError,
             ValidationError,
-            AuthenticationError,
         )
 
         handlers = app_with_overrides.exception_handlers
