@@ -77,7 +77,7 @@ def create_access_token(
         to_encode, settings.secret_key, algorithm=settings.algorithm
     )
 
-    return encoded_jwt  # type: ignore
+    return encoded_jwt
 
 
 def verify_token(token: str) -> Dict[str, Any]:
