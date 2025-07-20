@@ -58,6 +58,11 @@ Resources:
           Properties:
             Path: /{proxy+}
             Method: ANY
+        RootEndpoint:
+          Type: Api
+          Properties:
+            Path: /
+            Method: GET
         HealthCheck:
           Type: Api
           Properties:
