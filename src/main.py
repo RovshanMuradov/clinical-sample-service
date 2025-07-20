@@ -33,7 +33,7 @@ app = FastAPI(
     description="Clinical Sample Service API for Lambda deployment",
     docs_url="/docs",
     redoc_url="/redoc",
-    openapi_url="/Prod/openapi.json",
+    openapi_url="/openapi.json",
     debug=False,  # Always False in Lambda
 )
 
