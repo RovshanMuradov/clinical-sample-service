@@ -2,7 +2,7 @@ name: Deploy Clinical Sample API with SAM
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, develop ]
 
 jobs:
   deploy:
