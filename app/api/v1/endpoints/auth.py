@@ -5,11 +5,7 @@ from app.models.user import User
 from app.schemas.auth import Token, UserCreate, UserLogin, UserResponse
 from app.services.auth_service import AuthService
 
-from ...deps import (
-    get_current_active_user,
-    get_current_user,
-    get_database,
-)
+from ...deps import get_current_active_user, get_current_user, get_database
 
 # Create router for authentication endpoints
 router = APIRouter()
