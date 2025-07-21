@@ -1,3 +1,5 @@
+import asyncio
+
 import pytest
 
 from tests.helpers import build_sample_data, token_headers_for_user
@@ -53,3 +55,20 @@ async def test_end_to_end_flow(client, test_user2):
     # logout (simulate token expiry)
     logout_resp = await client.post("/api/v1/auth/refresh", headers=headers)
     assert logout_resp.status_code == 200
+
+
+@pytest.mark.asyncio
+async def test_transaction_rollback_on_error(authenticated_client, db_session):
+    """Failed sample creation should not persist anything."""
+    from app.repositories.sample_repository import SampleRepository
+    from app.schemas.sample import SampleFilter
+
+    repo = SampleRepository(db_session)
+    initial = await repo.count_samples_with_filters(SampleFilter(), user_id=None)
+
+    invalid_payload = build_sample_data(subject_id="1234")
+    resp = await authenticated_client.post("/api/v1/samples/", json=invalid_payload)
+    assert resp.status_code == 422
+
+    final = await repo.count_samples_with_filters(SampleFilter(), user_id=None)
+    assert final == initial
