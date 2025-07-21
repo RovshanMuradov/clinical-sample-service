@@ -143,7 +143,13 @@ def log_response(
             else (
                 "redirect"
                 if 300 <= status_code < 400
-                else "client_error" if 400 <= status_code < 500 else "server_error"
+                else (
+                    # fmt: off
+                    "client_error"
+                    if 400 <= status_code < 500
+                    else "server_error"
+                    # fmt: on
+                )
             )
         ),
     }

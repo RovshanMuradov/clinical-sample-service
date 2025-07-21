@@ -220,9 +220,11 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
         # HSTS (only for HTTPS)
         if self.enable_hsts:
-            response.headers["Strict-Transport-Security"] = (
-                "max-age=31536000; includeSubDomains; preload"
-            )
+            response.headers[
+                # fmt: off
+                "Strict-Transport-Security"
+                # fmt: on
+            ] = "max-age=31536000; includeSubDomains; preload"
 
 
 class RequestTimeoutMiddleware(BaseHTTPMiddleware):
