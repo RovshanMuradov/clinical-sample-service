@@ -4,6 +4,7 @@ Critical Data Isolation Tests for Clinical Sample Service.
 These tests are CRITICAL for medical data protection - they ensure that users
 can only access their own samples and never see or modify other users' data.
 """
+
 # from uuid import uuid4  # Removed unused import
 
 import pytest

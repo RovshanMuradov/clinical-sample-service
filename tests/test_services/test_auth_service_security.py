@@ -5,6 +5,7 @@ These tests verify critical security components for authentication in the clinic
 All tests are designed to prevent security vulnerabilities that could lead to unauthorized
 access to sensitive medical data.
 """
+
 import uuid
 from datetime import datetime, timedelta, timezone
 

@@ -1,7 +1,7 @@
 from typing import List, Optional
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Path, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.sample import SampleStatus, SampleType
@@ -282,12 +282,16 @@ async def get_samples(
         sample_type=sample_type,
         status=sample_status,
         subject_id=subject_id,
-        collection_date_from=datetime.strptime(collection_date_from, "%Y-%m-%d").date()
-        if collection_date_from
-        else None,
-        collection_date_to=datetime.strptime(collection_date_to, "%Y-%m-%d").date()
-        if collection_date_to
-        else None,
+        collection_date_from=(
+            datetime.strptime(collection_date_from, "%Y-%m-%d").date()
+            if collection_date_from
+            else None
+        ),
+        collection_date_to=(
+            datetime.strptime(collection_date_to, "%Y-%m-%d").date()
+            if collection_date_to
+            else None
+        ),
         storage_location=storage_location,
     )
 
@@ -661,7 +665,9 @@ async def delete_sample(
     },
 )
 async def get_samples_by_subject(
-    subject_id: str,
+    subject_id: str = Path(
+        ..., pattern=r"^[A-Za-z]\d{3,}$", description="Subject identifier"
+    ),
     db: AsyncSession = Depends(get_database),
     current_user: User = Depends(get_current_user),
 ):

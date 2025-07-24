@@ -1,6 +1,13 @@
 """
 Test configuration and fixtures.
 """
+
+import os
+
+os.environ["DATABASE_URL"] = "postgresql+asyncpg://user:pass@localhost:5432/testdb"
+os.environ.setdefault("SECRET_KEY", "test-secret")
+os.environ.setdefault("ALGORITHM", "HS256")
+
 import asyncio
 from datetime import date
 from typing import AsyncGenerator, Generator
@@ -117,6 +124,18 @@ async def test_user2(user_repository: UserRepository) -> User:
 
 
 @pytest_asyncio.fixture
+async def inactive_user(user_repository: UserRepository) -> User:
+    """Create an inactive test user."""
+    user_data = {
+        "username": "inactive",
+        "email": "inactive@example.com",
+        "hashed_password": get_password_hash("inactivePass1$"),
+        "is_active": False,
+    }
+    return await user_repository.create_user(user_data)
+
+
+@pytest_asyncio.fixture
 async def test_samples_user1(
     sample_repository: SampleRepository, test_user1: User
 ) -> list[Sample]:
@@ -194,3 +213,70 @@ async def test_samples_user2(
         samples.append(sample)
 
     return samples
+
+
+@pytest_asyncio.fixture
+async def app_with_overrides(async_session, monkeypatch):
+    """FastAPI app with test database overrides."""
+    monkeypatch.setenv("DATABASE_URL", SQLALCHEMY_TEST_DATABASE_URL)
+    monkeypatch.setenv("RATE_LIMIT_BURST", "1000")
+    monkeypatch.setenv("RATE_LIMIT_PER_MINUTE", "1000")
+    from app.api.deps import get_database
+    from app.main import app
+    from app.middleware.security_middleware import RateLimitMiddleware
+
+    async def _get_db_override():
+        yield async_session
+
+    app.dependency_overrides[get_database] = _get_db_override
+    # Disable rate limiting for tests
+    app.user_middleware = [
+        m for m in app.user_middleware if m.cls is not RateLimitMiddleware
+    ]
+    app.middleware_stack = app.build_middleware_stack()
+    yield app
+    app.dependency_overrides.clear()
+
+
+@pytest_asyncio.fixture
+async def client(app_with_overrides):
+    """HTTP client for API tests."""
+    from httpx import ASGITransport, AsyncClient
+
+    transport = ASGITransport(app_with_overrides)
+    async with AsyncClient(transport=transport, base_url="http://testserver") as ac:
+        yield ac
+
+
+@pytest_asyncio.fixture
+async def db_session(async_session: AsyncSession) -> AsyncGenerator[AsyncSession, None]:
+    """Alias for async_session fixture used by tests."""
+    yield async_session
+
+
+@pytest_asyncio.fixture
+async def authenticated_client(
+    client, auth_service: AuthService, test_user1: User
+) -> AsyncGenerator:
+    """HTTP client with Authorization header for test_user1."""
+    token = await auth_service.create_access_token_for_user(test_user1)
+    client.headers.update({"Authorization": f"Bearer {token.access_token}"})
+    yield client
+
+
+@pytest.fixture
+def test_data_builder():
+    """Factory to build sample data dictionaries."""
+
+    def _builder(**overrides):
+        data = {
+            "sample_type": "blood",
+            "subject_id": "P001",
+            "collection_date": str(date.today()),
+            "status": "collected",
+            "storage_location": "freezer-1-rowA",
+        }
+        data.update(overrides)
+        return data
+
+    return _builder

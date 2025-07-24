@@ -137,13 +137,21 @@ def log_response(
         "status_code": status_code,
         "response_time_ms": round(response_time * 1000, 2),
         "response_size_bytes": response_size,
-        "status_category": "success"
-        if 200 <= status_code < 300
-        else "redirect"
-        if 300 <= status_code < 400
-        else "client_error"
-        if 400 <= status_code < 500
-        else "server_error",
+        "status_category": (
+            "success"
+            if 200 <= status_code < 300
+            else (
+                "redirect"
+                if 300 <= status_code < 400
+                else (
+                    # fmt: off
+                    "client_error"
+                    if 400 <= status_code < 500
+                    else "server_error"
+                    # fmt: on
+                )
+            )
+        ),
     }
 
     # Choose log level based on status code

@@ -5,7 +5,7 @@ from app.models.user import User
 from app.schemas.auth import Token, UserCreate, UserLogin, UserResponse
 from app.services.auth_service import AuthService
 
-from ...deps import get_current_user, get_database
+from ...deps import get_current_active_user, get_current_user, get_database
 
 # Create router for authentication endpoints
 router = APIRouter()
@@ -281,3 +281,14 @@ async def refresh_token(
     """
     auth_service = AuthService(db)
     return await auth_service.refresh_access_token(current_user)
+
+
+@router.get(
+    "/me",
+    response_model=UserResponse,
+    summary="Get current user information",
+    description="Return information about the currently authenticated user.",
+)
+async def get_me(current_user: User = Depends(get_current_active_user)):
+    """Retrieve the active user making the request."""
+    return UserResponse.model_validate(current_user)

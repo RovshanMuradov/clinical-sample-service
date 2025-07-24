@@ -4,6 +4,7 @@ Authentication Business Logic Tests
 These tests verify core authentication business logic for the clinical samples system.
 They ensure proper validation of user registration, duplicate prevention, and login security.
 """
+
 import pytest
 
 from app.core.exceptions import AuthenticationError, ConflictError

@@ -15,6 +15,15 @@ class BaseAPIException(Exception):
         self.details = details or {}
         super().__init__(self.message)
 
+    def to_dict(self) -> Dict[str, Any]:
+        """Return a serializable representation of the exception."""
+        return {
+            "error": True,
+            "message": self.message,
+            "error_code": self.error_code,
+            "details": self.details,
+        }
+
 
 class NotFoundError(BaseAPIException):
     def __init__(
