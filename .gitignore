@@ -92,6 +92,9 @@ Workflow.md
 CLAUDE.md
 .claude/settings.local.json
 TESTING.md
+AWS.md
+FIXED_SECRETS.md
+SAM_DEPLOYMENT_GUIDE.md
 
 # SAM
 .aws-sam/
