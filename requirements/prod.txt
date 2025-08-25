@@ -1,9 +1,9 @@
 # Production dependencies
 fastapi==0.116.1
 uvicorn[standard]==0.35.0
-sqlalchemy==2.0.41
+sqlalchemy==2.0.43
 asyncpg==0.30.0
-psycopg2-binary==2.9.9
+psycopg2-binary==2.9.10
 alembic==1.16.4
 pyjwt==2.10.1
 passlib[bcrypt]==1.7.4
